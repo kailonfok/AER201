@@ -1,37 +1,25 @@
-//const int motorPin[] = {2,3,4,5};
-const int motorPin1 = 2;
-const int motorPin2 = 3;
-const int motorPin3 = 4;
-const int motorPin4 = 4;
-const int onOffButtonPin = 6;
-const int directionButPin = 7;
-const int enablePin = 9;
+const int motorPin[] = {2,3,4,5,6,7,8,9};
+const int directionButPin = 11;
+const int resetButPin = 12;
+const int enablePin = 10;
 
-const int numMotors = 4;
+int resetState = 0;
+int prevResetState = 0;
+int wheelState = 0;
 
-int motorSpeed = 0;
-int motorEnable = 0;
-int previousMotorEnable = 0;
-
-int motorOnOff = 0;
 int motorDirection = 0;
-
 int dir = 0;
 int prevDir = 0;
 
 void setup()
 {
   Serial.begin(9600);
-  /*for (int i = 0; i < numMotors; i++)
+  for (int i = 0; i < 9; i++)
   {
     pinMode(motorPin[i], OUTPUT);
-  }*/
-  pinMode(motorPin1, OUTPUT);
-  pinMode(motorPin2, OUTPUT);
-  pinMode(motorPin3, OUTPUT);
-  pinMode(motorPin4, OUTPUT);
-  pinMode(onOffButtonPin, INPUT);
+  }
   pinMode(directionButPin, INPUT);
+  pinMode(resetButPin, INPUT);
   pinMode(enablePin, OUTPUT);
   
   digitalWrite(enablePin, LOW);
@@ -39,66 +27,88 @@ void setup()
 
 void loop()
 {
-  motorEnable = digitalRead(onOffButtonPin);
-  delay(1);
-  
   dir = digitalRead(directionButPin);
   delay(1);
   
-  if(motorEnable != previousMotorEnable) //Switch between on and off
-  {
-    if(motorEnable)
-      motorOnOff = !motorOnOff;
-  }
+  resetState = digitalRead(resetButPin);
+  delay(1);
   
+  if(resetState != prevResetState)
+  {
+    if(resetState)
+      wheelState = 0;
+  }
+   
   if(dir != prevDir)
   {
     if(dir)
-      motorDirection = !motorDirection;
+    {
+      if (wheelState < 3)
+        wheelState++;
+      else
+        wheelState = 0;
+    }
   }
   
-  if (motorOnOff)
-  {
-    movement(motorDirection);
-    analogWrite(enablePin, HIGH);    
-    Serial.println("Going into movement");
-  }
-  else
-  {
-    analogWrite(enablePin, 0);
-  }
+  analogWrite(enablePin, HIGH);    
+  movement(motorDirection);
+
+  Serial.print("Motor Direction:  ");
+  Serial.println(wheelState);
   
-  Serial.print("Motor enable:  ");
-  Serial.println(motorOnOff);
-  
-  previousMotorEnable = motorEnable;
+  prevResetState = resetState;
   prevDir = dir;
 }
 
-void movement(int motorDirection)
+void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is left
 {
-   if(motorDirection)
+   if(motorDirection == 0)
    {
      //Move forward
      Serial.println("Moving forward");     
-     digitalWrite(motorPin1, HIGH);
-     digitalWrite(motorPin2, LOW);
-     digitalWrite(motorPin3, HIGH);
-     digitalWrite(motorPin4, LOW);
-     
-     //turn
-     /*
      digitalWrite(motorPin[0], HIGH);
-     digitalWrite(motorPin[1], LOW));
-     digitalWrite(motorPin[2]), LOW);
-     digitalWrite(motorPin[3], HIGH);     
-     */
+     digitalWrite(motorPin[1], LOW);
+     digitalWrite(motorPin[2], HIGH);
+     digitalWrite(motorPin[3], LOW);
+     digitalWrite(motorPin[4], HIGH);
+     digitalWrite(motorPin[5], LOW);
+     digitalWrite(motorPin[6], HIGH);
+     digitalWrite(motorPin[7], LOW);     
+   }
+   else if (motorDirection == 1)
+   {
+     Serial.println("Moving right");
+     digitalWrite(motorPin[0], HIGH);
+     digitalWrite(motorPin[1], LOW);
+     digitalWrite(motorPin[2], HIGH);
+     digitalWrite(motorPin[3], LOW);
+     digitalWrite(motorPin[4], HIGH);
+     digitalWrite(motorPin[5], LOW);
+     digitalWrite(motorPin[6], HIGH);
+     digitalWrite(motorPin[7], LOW);     
+   }
+   else if (motorDirection == 2)
+   {
+     Serial.println("Moving backwards");
+     digitalWrite(motorPin[0], HIGH);
+     digitalWrite(motorPin[1], LOW);
+     digitalWrite(motorPin[2], HIGH);
+     digitalWrite(motorPin[3], LOW);
+     digitalWrite(motorPin[4], HIGH);
+     digitalWrite(motorPin[5], LOW);
+     digitalWrite(motorPin[6], HIGH);
+     digitalWrite(motorPin[7], LOW);     
    }
    else
    {
-     digitalWrite(motorPin1, LOW);
-     digitalWrite(motorPin2, HIGH);
-     digitalWrite(motorPin3, LOW);
-     digitalWrite(motorPin4, HIGH);
+     Serial.println("Moving left");     
+     digitalWrite(motorPin[0], HIGH);
+     digitalWrite(motorPin[1], LOW);
+     digitalWrite(motorPin[2], HIGH);
+     digitalWrite(motorPin[3], LOW);
+     digitalWrite(motorPin[4], HIGH);
+     digitalWrite(motorPin[5], LOW);
+     digitalWrite(motorPin[6], HIGH);
+     digitalWrite(motorPin[7], LOW);     
    }
 }
