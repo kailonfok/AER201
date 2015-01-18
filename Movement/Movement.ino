@@ -10,6 +10,14 @@ int wheelState = 0;
 boolean dir = 0;
 boolean prevDir = 0;
 
+int n = 6;
+
+int board[n,n];
+int presentLocation[], = {n/2, n/2};
+int xLocationHopper = 4;
+int yLocationHopper = 4;
+int distance = 0;
+
 void setup()
 {
   Serial.begin(9600);
