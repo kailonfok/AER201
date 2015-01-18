@@ -66,13 +66,16 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
    {
      //Move forward
      Serial.println("Moving forward");     
-     digitalWrite(motorPin[0], HIGH);
+     digitalWrite(motorPin[0], HIGH); // front left wheel
      digitalWrite(motorPin[1], LOW);
-     digitalWrite(motorPin[2], HIGH);
+     
+     digitalWrite(motorPin[2], HIGH); // front right wheel
      digitalWrite(motorPin[3], LOW);
-     digitalWrite(motorPin[4], HIGH);
+     
+     digitalWrite(motorPin[4], HIGH); // back right wheel
      digitalWrite(motorPin[5], LOW);
-     digitalWrite(motorPin[6], HIGH);
+     
+     digitalWrite(motorPin[6], HIGH); // back left wheel
      digitalWrite(motorPin[7], LOW);     
    }
    else if (motorDirection == 1)
@@ -80,34 +83,43 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
      Serial.println("Moving right");
      digitalWrite(motorPin[0], HIGH);
      digitalWrite(motorPin[1], LOW);
-     digitalWrite(motorPin[2], HIGH);
-     digitalWrite(motorPin[3], LOW);
+     
+     digitalWrite(motorPin[2], LOW);
+     digitalWrite(motorPin[3], HIGH);
+     
      digitalWrite(motorPin[4], HIGH);
      digitalWrite(motorPin[5], LOW);
-     digitalWrite(motorPin[6], HIGH);
-     digitalWrite(motorPin[7], LOW);     
+     
+     digitalWrite(motorPin[6], LOW);
+     digitalWrite(motorPin[7], HIGH);     
    }
    else if (motorDirection == 2)
    {
      Serial.println("Moving backwards");
-     digitalWrite(motorPin[0], HIGH);
-     digitalWrite(motorPin[1], LOW);
-     digitalWrite(motorPin[2], HIGH);
-     digitalWrite(motorPin[3], LOW);
-     digitalWrite(motorPin[4], HIGH);
-     digitalWrite(motorPin[5], LOW);
-     digitalWrite(motorPin[6], HIGH);
-     digitalWrite(motorPin[7], LOW);     
+     digitalWrite(motorPin[0], LOW);
+     digitalWrite(motorPin[1], HIGH);
+     
+     digitalWrite(motorPin[2], LOW);
+     digitalWrite(motorPin[3], HIGH);
+     
+     digitalWrite(motorPin[4], LOW);
+     digitalWrite(motorPin[5], HIGH);
+     
+     digitalWrite(motorPin[6], LOW);
+     digitalWrite(motorPin[7], HIGH);     
    }
    else
    {
      Serial.println("Moving left");     
-     digitalWrite(motorPin[0], HIGH);
-     digitalWrite(motorPin[1], LOW);
+     digitalWrite(motorPin[0], LOW);
+     digitalWrite(motorPin[1], HIGH);
+     
      digitalWrite(motorPin[2], HIGH);
      digitalWrite(motorPin[3], LOW);
-     digitalWrite(motorPin[4], HIGH);
-     digitalWrite(motorPin[5], LOW);
+     
+     digitalWrite(motorPin[4], LOW);
+     digitalWrite(motorPin[5], HIGH);
+     
      digitalWrite(motorPin[6], HIGH);
      digitalWrite(motorPin[7], LOW);     
    }
