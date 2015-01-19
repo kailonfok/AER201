@@ -168,10 +168,10 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
      digitalWrite(motorPin[2], !highLow);
      digitalWrite(motorPin[3], highLow);
      
-     digitalWrite(motorPin[4], highLow);
-     digitalWrite(motorPin[5], !highLow);
+     digitalWrite(motorPin[4], !highLow);
+     digitalWrite(motorPin[5], highLow);
      
-     digitalWrite(motorPin[6], !highLow);
-     digitalWrite(motorPin[7], highLow);
+     digitalWrite(motorPin[6], highLow);
+     digitalWrite(motorPin[7], !highLow);
    }
  }

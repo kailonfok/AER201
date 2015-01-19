@@ -89,16 +89,16 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
  
    if(motorDirection == 0 || motorDirection == 2)
    {
-     digitalWrite(motorPin[0], highLow); // front left wheel
+     digitalWrite(motorPin[0], highLow); // back right wheel
      digitalWrite(motorPin[1], !highLow);
      
      digitalWrite(motorPin[2], highLow); // front right wheel
      digitalWrite(motorPin[3], !highLow);
      
-     digitalWrite(motorPin[4], highLow); // back right wheel
+     digitalWrite(motorPin[4], highLow); // back left wheel
      digitalWrite(motorPin[5], !highLow);
      
-     digitalWrite(motorPin[6], highLow); // back left wheel
+     digitalWrite(motorPin[6], highLow); // front left wheel
      digitalWrite(motorPin[7], !highLow);          
    }
    else
