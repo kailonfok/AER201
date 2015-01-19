@@ -12,8 +12,9 @@ boolean prevDir = 0;
 
 //byte board[6][8] = {{0}};
 byte presentLocation[2] = {3,1};
-int xLocationHopper[4] = {1,6,3,4};
-int yLocationHopper[4] = {1,1,3,5};
+int xLocationHopper[4] = {1,6};//,3,4};
+int yLocationHopper[4] = {1,1};//,3,5};
+int endLocation[2] = {3,8};
 int distance = 0;
 int hopperNum = 0;
 
@@ -50,30 +51,49 @@ void loop()
   Serial.print("Which hopper:  ");
   Serial.println(hopperNum);
   
-  if(xLocationHopper[hopperNum] != presentLocation[0])
-  {
-    drive(xLocationHopper[hopperNum], presentLocation[0], 0);
-  }
-  presentLocation[0] = xLocationHopper[hopperNum];  
-  Serial.print("Present Location-X:  ");
-  Serial.println(presentLocation[0]);
-  delay(10000);
-    
   if(yLocationHopper[hopperNum] != presentLocation[1])
   {
     drive(yLocationHopper[hopperNum], presentLocation[1], 1);
+    presentLocation[1] = yLocationHopper[hopperNum];
   }
-  presentLocation[1] = yLocationHopper[hopperNum];
+  else
+  {
+    drive(endLocation[1], presentLocation[1], 1);    
+    presentLocation[1] = endLocation[1];
+  }
+  
   Serial.print("Present Location-Y:  ");
   Serial.println(presentLocation[1]);  
+  delay(10000);  
+  
+  if(xLocationHopper[hopperNum] != presentLocation[0])
+  {
+    drive(xLocationHopper[hopperNum], presentLocation[0], 0);
+    presentLocation[0] = xLocationHopper[hopperNum];      
+  }
+  else
+  {
+    drive(endLocation[0], presentLocation[0], 0);
+    presentLocation[0] = endLocation[0];
+    Serial.print("Deposited hopper #");
+    Serial.print(hopperNum);
+    Serial.println("!");
+
+    if(hopperNum < 4)
+      hopperNum++; 
+  }
+
+  Serial.print("Present Location-X:  ");
+  Serial.println(presentLocation[0]);
   delay(10000);
+      
+  //somehow direct robot to move along the walls to location (3,8)
+  // location is (1,1)
+  // want to move y, then x
 
   Serial.print("Motor Direction:  ");
   Serial.println(wheelState);
-
-  if(hopperNum < 4)
-    hopperNum++;  
-    
+  
   prevResetState = resetState;
   prevDir = dir;
 }
@@ -118,6 +138,7 @@ void drive(int locationHopper, int presentLocation, int VH) // VH = 1, F/B - VH 
     presentLocation += moved;
     Serial.print("Present Location:  ");
     Serial.println(presentLocation);
+    delay(10000);
   }
 }
 
