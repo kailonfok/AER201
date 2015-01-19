@@ -1,3 +1,5 @@
+/*not going to first hopper correctly/going to new hopper and back properly*/
+
 const int motorPin[] = {2,3,4,5,6,7,8,9};
 const int directionButPin = 11;
 const int resetButPin = 12;
