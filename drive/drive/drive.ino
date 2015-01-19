@@ -10,13 +10,12 @@ int wheelState = 0;
 boolean dir = 0;
 boolean prevDir = 0;
 
-int n = 6;
-
-byte board[6][6] = {{0}};
+//byte board[6][8] = {{0}};
 byte presentLocation[2] = {3,1};
-int xLocationHopper = 1;
-int yLocationHopper = 1;
+int xLocationHopper[4] = {1,6,3,4};
+int yLocationHopper[4] = {1,1,3,5};
 int distance = 0;
+int hopperNum = 0;
 
 void setup()
 {
@@ -48,27 +47,33 @@ void loop()
   
   analogWrite(enablePin, HIGH);    
 //  movement(wheelState);
-
-  if(xLocationHopper != presentLocation[0])
+  Serial.print("Which hopper:  ");
+  Serial.println(hopperNum);
+  
+  if(xLocationHopper[hopperNum] != presentLocation[0])
   {
-    drive(xLocationHopper, presentLocation[0], 0);
+    drive(xLocationHopper[hopperNum], presentLocation[0], 0);
   }
+  presentLocation[0] = xLocationHopper[hopperNum];  
   Serial.print("Present Location-X:  ");
   Serial.println(presentLocation[0]);
-  
-  presentLocation[0] = xLocationHopper;
-  
-  if(yLocationHopper != presentLocation[1])
+  delay(10000);
+    
+  if(yLocationHopper[hopperNum] != presentLocation[1])
   {
-    drive(yLocationHopper, presentLocation[1], 1);
+    drive(yLocationHopper[hopperNum], presentLocation[1], 1);
   }
-  presentLocation[1] = yLocationHopper;
+  presentLocation[1] = yLocationHopper[hopperNum];
   Serial.print("Present Location-Y:  ");
   Serial.println(presentLocation[1]);  
+  delay(10000);
 
   Serial.print("Motor Direction:  ");
   Serial.println(wheelState);
-  
+
+  if(hopperNum < 4)
+    hopperNum++;  
+    
   prevResetState = resetState;
   prevDir = dir;
 }
