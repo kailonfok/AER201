@@ -43,13 +43,16 @@ void loop()
     if(dir)
     {
       if (wheelState < 3)
+      {
         wheelState++;
+//        delay(10000);
+      }
       else
         wheelState = 0;
     }
   }
   
-  analogWrite(enablePin, HIGH);    
+  analogWrite(enablePin, 255);    
   movement(wheelState);
 
   Serial.print("Motor Direction:  ");
@@ -63,7 +66,7 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
 {
    boolean highLow = 0;
    
-    if(motorDirection == 0)
+   if(motorDirection == 0)
    {
      highLow = 1;
      Serial.println("Moving forward");     
@@ -106,10 +109,10 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
      digitalWrite(motorPin[2], !highLow);
      digitalWrite(motorPin[3], highLow);
      
-     digitalWrite(motorPin[4], highLow);
-     digitalWrite(motorPin[5], !highLow);
+     digitalWrite(motorPin[4], !highLow);
+     digitalWrite(motorPin[5], highLow);
      
-     digitalWrite(motorPin[6], !highLow);
-     digitalWrite(motorPin[7], highLow);
+     digitalWrite(motorPin[6], highLow);
+     digitalWrite(motorPin[7], !highLow);
    }
  }
