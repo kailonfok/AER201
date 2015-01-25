@@ -1,7 +1,7 @@
-const int motorPin[] = {2,3,4,5,6,7,8,9};
-const int directionButPin = 11;
-const int resetButPin = 12;
-const int enablePin = 10;
+const int motorPin[] = {32,33,34,35,36,37,38,39};
+const int directionButPin = 41;
+const int resetButPin = 42;
+const int enablePin = 40;
 
 boolean resetState = 0;
 boolean prevResetState = 0;
