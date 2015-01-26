@@ -16,16 +16,18 @@
 #define trigPin 23 // Trigger Pin
 #define LEDPin1 24 // red LED for out of range
 #define LEDPin2 25 // green LED for in range
+const float distanceConstant = 58.2;
 
-int maximumRange = 200; // Maximum range needed
-int minimumRange = 0; // Minimum range needed
+int maximumRange = 15; // Maximum range needed
+int minimumRange = 5; // Minimum range needed
 long duration, distance; // Duration used to calculate distance
 
 void setup() {
   Serial.begin (9600);
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
-  pinMode(LEDPin, OUTPUT); // Use LED indicator (if required)
+  pinMode(LEDPin1, OUTPUT); // Use LED indicator (if required)
+  pinMode(LEDPin2, OUTPUT); // Use LED indicator (if required)
 }
 
 void loop() {
@@ -41,22 +43,28 @@ void loop() {
   duration = pulseIn(echoPin, HIGH);
 
   //Calculate the distance (in cm) based on the speed of sound.
-  distance = duration/58.2;
+  distance = duration/distanceConstant;
 
   Serial.print("The distance is: ");
-  if (distance >= maximumRange || distance <= minimumRange){
+  if (distance <= minimumRange){
     /* Send a negative number to computer and Turn LED ON 
      to indicate "out of range" */
     Serial.println(distance);
     digitalWrite(LEDPin1, HIGH);
     digitalWrite(LEDPin2, LOW); 
   }
-  else {
+  else if (distance >= maximumRange){
     /* Send the distance to the computer using Serial protocol, and
      turn LED OFF to indicate successful reading. */
     Serial.println(distance);
     digitalWrite(LEDPin1, LOW); 
     digitalWrite(LEDPin2, HIGH);    
+  }
+  else
+  {
+    digitalWrite(LEDPin1, HIGH);
+    digitalWrite(LEDPin2, HIGH);
+    Serial.println(distance);
   }
 
   //Delay 50ms before next reading.
