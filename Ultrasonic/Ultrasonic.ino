@@ -14,8 +14,8 @@
 
 #define echoPin 22 // Echo Pin
 #define trigPin 23 // Trigger Pin
-#define LEDPin1 24 // red LED for out of range
-#define LEDPin2 25 // green LED for in range
+#define LEDPin1 52 // red LED for out of range
+#define LEDPin2 53 // green LED for in range
 const float distanceConstant = 58.2;
 
 int maximumRange = 15; // Maximum range needed

@@ -22,7 +22,7 @@ boolean prevEnableState = 0;
 int wheelState = 0;
 
 int dir = 1; // 0 - front, 1 - right, 2 - back, 3 - left
-int prevDir;
+int prevDir = 2;
 int sensorNum = 1;
 
 void setup()
@@ -76,38 +76,47 @@ void loop()
     digitalWrite(LEDPin1, LOW);
     digitalWrite(LEDPin2, HIGH);
 
-    prevDir = dir;
-    if (dir == 1)// || dir == 3)
+    if (dir == 1 || dir == 3)
     {
-      //     prevDir = dir;
-      dir = 0;
-      sensorNum = 0;
-      delay(1000);         
+      if (prevDir == 2)
+      {
+        prevDir = dir;
+        dir = 0;
+        sensorNum = 0;
+      }
+      else if (prevDir == 0)
+      {
+        prevDir = dir;
+        dir = 2;
+        sensorNum = 2;
+      }      
     }
     else if (dir == 0)
     {
       if (prevDir == 1)
       {
-        //      prevDir = dir;
+        prevDir = dir;        
         dir = 3;
-        sensorNum = 3;
+        sensorNum = 3;    
       }
       else if(prevDir == 3)
       {
+        prevDir = dir;        
         dir = 1;
         sensorNum = 1;
-      }
-      delay(1000);      
+      }      
     }
     else if (dir == 2)
     {
       if(prevDir == 1)
       {
+        prevDir = dir;        
         dir = 3;
         sensorNum = 3;
       }
       else if (prevDir == 3)
       {
+        prevDir = dir;        
         dir = 1;
         sensorNum = 1;
       }
@@ -203,6 +212,7 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
       digitalWrite(motorPin[i], 0);
     }
   }
+  delay(50);
 }
 
 void sensor(int sensorNum)
