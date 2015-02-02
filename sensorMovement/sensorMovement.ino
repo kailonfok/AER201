@@ -179,31 +179,17 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
 
   if(motorDirection == 0 || motorDirection == 2)
   {
-    digitalWrite(motorPin[0], highLow); // back right wheel
-    digitalWrite(motorPin[1], !highLow);
-
-    digitalWrite(motorPin[2], highLow); // front right wheel
-    digitalWrite(motorPin[3], !highLow);
-
-    digitalWrite(motorPin[4], highLow); // back left wheel
-    digitalWrite(motorPin[5], !highLow);
-
-    digitalWrite(motorPin[6], !highLow); // front left wheel
-    digitalWrite(motorPin[7], highLow);          
-  }
-  else if (motorDirection == 1 || motorDirection == 3)
-  {
     digitalWrite(motorPin[0], highLow);
     digitalWrite(motorPin[1], !highLow);
-
-    digitalWrite(motorPin[2], !highLow);
-    digitalWrite(motorPin[3], highLow);
-
-    digitalWrite(motorPin[4], !highLow);
-    digitalWrite(motorPin[5], highLow);
-
-    digitalWrite(motorPin[6], !highLow);
-    digitalWrite(motorPin[7], highLow);
+    digitalWrite(motorPin[2], highLow);
+    digitalWrite(motorPin[3], !highLow);    
+  }
+  else if(motorDirection == 1 || motorDirection == 3)
+  {
+    digitalWrite(motorPin[4], highLow);
+    digitalWrite(motorPin[5], !highLow);
+    digitalWrite(motorPin[6], highLow);
+    digitalWrite(motorPin[7], !highLow);    
   }
   else
   {
@@ -212,7 +198,6 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
       digitalWrite(motorPin[i], 0);
     }
   }
-  delay(50);
 }
 
 void sensor(int sensorNum)
@@ -228,4 +213,6 @@ void sensor(int sensorNum)
 
   //Calculate the distance (in cm) based on the speed of sound.
   distance = duration/distanceConstant;  
+  
+  delay(50);
 }
