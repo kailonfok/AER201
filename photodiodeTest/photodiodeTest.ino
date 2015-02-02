@@ -6,7 +6,7 @@ int counter = 0;
 
 void setup()
 {
-  Serial.begin(2400);
+  Serial.begin(4800);
   pinMode(analogInPin, INPUT);
 }
 

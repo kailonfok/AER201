@@ -172,10 +172,18 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
     digitalWrite(motorPin[0], highLow);
     digitalWrite(motorPin[1], !highLow);
     digitalWrite(motorPin[2], highLow);
-    digitalWrite(motorPin[3], !highLow);    
+    digitalWrite(motorPin[3], !highLow);
+    digitalWrite(motorPin[4], LOW);
+    digitalWrite(motorPin[5], LOW);
+    digitalWrite(motorPin[6], LOW);
+    digitalWrite(motorPin[7], LOW);            
   }
   else if(motorDirection == 1 || motorDirection == 3)
   {
+    digitalWrite(motorPin[0], LOW);
+    digitalWrite(motorPin[1], LOW);
+    digitalWrite(motorPin[2], LOW);
+    digitalWrite(motorPin[3], LOW);    
     digitalWrite(motorPin[4], highLow);
     digitalWrite(motorPin[5], !highLow);
     digitalWrite(motorPin[6], highLow);
