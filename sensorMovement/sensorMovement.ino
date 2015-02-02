@@ -68,14 +68,25 @@ void loop()
   }
 
   Serial.print("The distance is: ");
-  if (distance <= maxRange){
-    /* Send a negative number to computer and Turn LED ON 
-     to indicate "out of range" */
-  //  Serial.print("The direction is: ");
-//    Serial.println(dir);*/
-    digitalWrite(LEDPin1, LOW);
-    digitalWrite(LEDPin2, HIGH);
 
+  keepDriving();
+  
+  Serial.println(distance);
+  Serial.print("Previous direction: ");
+  Serial.println(prevDir);
+
+  Serial.print("Motor Direction:  ");
+  Serial.println(wheelState);
+
+  prevEnableState = enableState;
+}
+
+void keepDriving()
+{
+  if (distance <= maxRange)
+  {
+    digitalWrite(LEDPin1, LOW);
+    digitalWrite(LEDPin2, HIGH);    
     if (dir == 1 || dir == 3)
     {
       if (prevDir == 2)
@@ -123,29 +134,10 @@ void loop()
     } 
   }
   else if (distance >= maxRange){
-    /* Send the distance to the computer using Serial protocol, and
-     turn LED OFF to indicate successful reading. */
     digitalWrite(LEDPin1, HIGH); 
     digitalWrite(LEDPin2, LOW);
     movement(dir);    
-  }
-  Serial.println(distance);
-  Serial.print("Previous direction: ");
-  Serial.println(prevDir);
-  /*else
-   {
-   digitalWrite(LEDPin1, LOW);
-   digitalWrite(LEDPin2, HIGH);
-   Serial.println(distance);
-   wheelState = -1;
-   }*/
-
-  //movement(wheelState);
-
-  Serial.print("Motor Direction:  ");
-  Serial.println(wheelState);
-
-  prevEnableState = enableState;
+  }  
 }
 
 void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is left, -1 is nothing
