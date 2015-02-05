@@ -1,10 +1,10 @@
-const int echoPin[] = {22,24};
-const int trigPin[] = {23,25};
+const int echoPin[] = {24,22};
+const int trigPin[] = {25,23};
 const float distanceConstant = 58.2;
-const int maxRange = 5;
+const int maxRange = 10;
 
-const int motorPin[] = {32,33,34,35};
-const int enablePin = 40;
+const int motorPin[] = {36,37,38,39};
+const int enablePin[] = {2, 3};
 
 long duration, distance;
 
@@ -22,10 +22,11 @@ void setup()
     {
       pinMode(trigPin[i], OUTPUT);
       pinMode(echoPin[i], INPUT);
+//      pinMode(enablePin[i], OUTPUT);
     }
   }
-  
-  digitalWrite(enablePin, LOW);
+//  pinMode(enablePin[0], OUTPUT);
+//  pinMode(enablePin[1], OUTPUT);
 }
 
 void loop()
@@ -34,7 +35,14 @@ void loop()
   Serial.print("Sensor Number: ");
   Serial.println(sensorNum);
   
-  analogWrite(enablePin, 255);
+//  analogWrite(enablePin[0], 200);
+//  analogWrite(enablePin[1], 200);
+
+  analogWrite(enablePin[0], 153);
+  analogWrite(enablePin[1], 165);
+
+//  digitalWrite(enablePin[0], 100);
+//  digitalWrite(enablePin[1], 175);
   
   Serial.print("The distance is: ");
   
@@ -63,6 +71,8 @@ void loop()
 
 void keepDriving(int dir)
 {
+  digitalWrite(enablePin[0], LOW);
+  digitalWrite(enablePin[1], LOW);
   if (distance <= maxRange)
   {
     if(dir == 0)
