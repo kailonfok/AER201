@@ -6,26 +6,24 @@ const int trigPin[] = {
 const int LEDPin1 = 52; // red LED for out of range
 const int LEDPin2 = 53; // blue LED for in range
 const float distanceConstant = 58.2;
-int maxRange = 25;
+const int maxRange = 25;
 
 //define constants for motors
 const int motorPin[] = {
   32,33,34,35,36,37,38,39};
 const int directionButPin = 41;
-const int enablePin[] = {
-  2,3,4,5};
+const int enableButPin = 42;
+const int enablePin = 40;
 
 long duration, distance;
-long prevDistance = 0;
 
-//boolean enableState = 0;
-//boolean prevEnableState = 0;
+boolean enableState = 0;
+boolean prevEnableState = 0;
 int wheelState = 0;
 
 int dir = 1; // 0 - front, 1 - right, 2 - back, 3 - left
 int prevDir = 2;
 int sensorNum = 1;
-boolean highLow = 0;
 
 void setup()
 {
@@ -44,10 +42,10 @@ void setup()
     }
   }
   pinMode(directionButPin, INPUT);
-//  pinMode(enableButPin, INPUT);
-//  pinMode(enablePin, OUTPUT);
-//
-//  digitalWrite(enablePin, LOW);
+  pinMode(enableButPin, INPUT);
+  pinMode(enablePin, OUTPUT);
+
+  digitalWrite(enablePin, LOW);
 }
 
 void loop()
@@ -56,21 +54,21 @@ void loop()
   Serial.print("Sensor Number: ");
   Serial.println(sensorNum);
 
-  //  enableState = digitalRead(enableButPin);
-  //  delay(1);
-  //
-  //  if(enableState != prevEnableState)
-  //  {
-  //    if(enableState)
-  //      analogWrite(enablePin, 255);
-  //    else
-  //      analogWrite(enablePin, 0);
-  //  }
+  enableState = digitalRead(enableButPin);
+  delay(1);
+
+  if(enableState != prevEnableState)
+  {
+    if(enableState)
+      analogWrite(enablePin, 255);
+    else
+      analogWrite(enablePin, 0);
+  }
 
   Serial.print("The distance is: ");
 
   keepDriving();
-
+  
   Serial.println(distance);
   Serial.print("Previous direction: ");
   Serial.println(prevDir);
@@ -78,7 +76,7 @@ void loop()
   Serial.print("Motor Direction:  ");
   Serial.println(wheelState);
 
-  //  prevEnableState = enableState;
+  prevEnableState = enableState;
 }
 
 void keepDriving()
@@ -87,49 +85,51 @@ void keepDriving()
   {
     digitalWrite(LEDPin1, LOW);
     digitalWrite(LEDPin2, HIGH);    
-    if(dir == 1)
+    if (dir == 1 || dir == 3)
     {
-      Serial.println("Got to first checkpoint");
-      delay(1000);
-      prevDir = dir;
-      prevDistance = distance;
-      dir = rotateRobot(prevDir);
-      sensorNum = 2;
+      if (prevDir == 2)
+      {
+        prevDir = dir;
+        dir = 0;
+        sensorNum = 0;
+      }
+      else if (prevDir == 0)
+      {
+        prevDir = dir;
+        dir = 2;
+        sensorNum = 2;
+      }      
     }
     else if (dir == 0)
     {
-//      if(prevDir == 2)
-//      {
-//        prevDir = 0;
-//        dir = 0;
-//        Serial.println("Got to fifth checkpoint");
-//        delay(1000);        
-//      }
-//      else
-//      {
-        Serial.println("Going to board");
-        delay(1000);
-        prevDir = dir;
+      if (prevDir == 1)
+      {
+        prevDir = dir;        
         dir = 3;
-        sensorNum = 3;
-//      }
+        sensorNum = 3;    
+      }
+      else if(prevDir == 3)
+      {
+        prevDir = dir;        
+        dir = 1;
+        sensorNum = 1;
+      }      
     }
     else if (dir == 2)
     {
-      Serial.println("Got to third checkpoint");
-      delay(1000);      
-      prevDir = dir;
-      sensorNum = 0;
-      sensor(sensorNum);
-
-      while(distance <= prevDistance)
+      if(prevDir == 1)
       {
-        sensor(0);
-        movement(sensorNum);
+        prevDir = dir;        
+        dir = 3;
+        sensorNum = 3;
       }
-
-      dir = rotateRobot(prevDir);
-    }
+      else if (prevDir == 3)
+      {
+        prevDir = dir;        
+        dir = 1;
+        sensorNum = 1;
+      }
+    } 
   }
   else if (distance >= maxRange){
     digitalWrite(LEDPin1, HIGH); 
@@ -138,62 +138,10 @@ void keepDriving()
   }  
 }
 
-int rotateRobot(int whichWay)
-{
-  int lastTime = millis();
-
-  if(whichWay == 1)
-  {
-    Serial.println("Got to second checkpoint");
-    delay(1000);
-    analogWrite(enablePin[2], 175);
-    analogWrite(enablePin[3], 125);
-
-    while(millis() - lastTime < 1000)
-    {
-      digitalWrite(motorPin[4], !highLow);
-      digitalWrite(motorPin[5], highLow);
-      digitalWrite(motorPin[6], highLow);
-      digitalWrite(motorPin[7], !highLow);      
-    }
-
-    digitalWrite(motorPin[4], LOW);
-    digitalWrite(motorPin[5], LOW);
-    digitalWrite(motorPin[6], LOW);
-    digitalWrite(motorPin[7], LOW);      
-
-    maxRange = 5;
-
-    return 2;
-  }
-  else if (whichWay == 2)
-  {
-    Serial.println("Got to fourth checkpoint");
-    delay(1000);    
-    analogWrite(enablePin[2], 175);
-    analogWrite(enablePin[3], 125);
-
-    while(millis() - lastTime < 1000)
-    {
-      digitalWrite(motorPin[4], highLow);
-      digitalWrite(motorPin[5], !highLow);
-      digitalWrite(motorPin[6], !highLow);
-      digitalWrite(motorPin[7], highLow);       
-    } 
-
-    digitalWrite(motorPin[4], LOW);
-    digitalWrite(motorPin[5], LOW);
-    digitalWrite(motorPin[6], LOW);
-    digitalWrite(motorPin[7], LOW);      
-
-    maxRange = 25;
-
-    return 0;    
-  }
-}
-
 void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is left, -1 is nothing
 {
+  boolean highLow = 0;
+
   if(motorDirection == 0)
   {
     highLow = 1;
@@ -221,8 +169,6 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
 
   if(motorDirection == 0 || motorDirection == 2)
   {
-    analogWrite(enablePin[0], 175);
-    analogWrite(enablePin[1], 175);
     digitalWrite(motorPin[0], highLow);
     digitalWrite(motorPin[1], !highLow);
     digitalWrite(motorPin[2], highLow);
@@ -234,8 +180,6 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
   }
   else if(motorDirection == 1 || motorDirection == 3)
   {
-    analogWrite(enablePin[2], 175);
-    analogWrite(enablePin[3], 175);    
     digitalWrite(motorPin[0], LOW);
     digitalWrite(motorPin[1], LOW);
     digitalWrite(motorPin[2], LOW);
@@ -267,8 +211,6 @@ void sensor(int sensorNum)
 
   //Calculate the distance (in cm) based on the speed of sound.
   distance = duration/distanceConstant;  
-
+  
   delay(50);
 }
-
-

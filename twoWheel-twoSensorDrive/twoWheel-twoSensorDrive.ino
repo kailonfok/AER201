@@ -35,8 +35,14 @@ void loop()
   Serial.print("Sensor Number: ");
   Serial.println(sensorNum);
   
+//  analogWrite(enablePin[0], 200);
+//  analogWrite(enablePin[1], 200);
+
   analogWrite(enablePin[0], 153);
   analogWrite(enablePin[1], 165);
+
+//  digitalWrite(enablePin[0], 100);
+//  digitalWrite(enablePin[1], 175);
   
   Serial.print("The distance is: ");
   
