@@ -6,26 +6,30 @@ const int trigPin[] = {
 const int LEDPin1 = 52; // red LED for out of range
 const int LEDPin2 = 53; // blue LED for in range
 const float distanceConstant = 58.2;
+
+// define variables and constants for encoders
+//const int encoderPins[] = {2,3,4,5};
+//int encoderReadings[] = {0,0}; // match to enable pins
+//int encoderCount[] = {0,0};
+
 int maxRange = 25;
 
 //define constants for motors
 const int motorPin[] = {
   32,33,34,35,36,37,38,39};
-const int directionButPin = 41;
 const int enablePin[] = {
-  2,3,4,5};
+  2,3,4,5}; // Starts from top, going clockwise
 
 long duration, distance;
 long prevDistance = 0;
 
-//boolean enableState = 0;
-//boolean prevEnableState = 0;
 int wheelState = 0;
 
 int dir = 1; // 0 - front, 1 - right, 2 - back, 3 - left
 int prevDir = 2;
 int sensorNum = 1;
 boolean highLow = 0;
+boolean backingUp = 0;
 
 void setup()
 {
@@ -41,13 +45,9 @@ void setup()
     {
       pinMode(trigPin[i], OUTPUT);
       pinMode(echoPin[i], INPUT);
+//      pinMode(encoderPins[i], INPUT);
     }
   }
-  pinMode(directionButPin, INPUT);
-//  pinMode(enableButPin, INPUT);
-//  pinMode(enablePin, OUTPUT);
-//
-//  digitalWrite(enablePin, LOW);
 }
 
 void loop()
@@ -56,20 +56,17 @@ void loop()
   Serial.print("Sensor Number: ");
   Serial.println(sensorNum);
 
-  //  enableState = digitalRead(enableButPin);
-  //  delay(1);
-  //
-  //  if(enableState != prevEnableState)
-  //  {
-  //    if(enableState)
-  //      analogWrite(enablePin, 255);
-  //    else
-  //      analogWrite(enablePin, 0);
-  //  }
-
   Serial.print("The distance is: ");
 
-  keepDriving();
+  if(backingUp == 0)
+  {    
+    keepDriving();
+  }
+  else
+  {
+    driveOutHopper();
+  }
+    
 
   Serial.println(distance);
   Serial.print("Previous direction: ");
@@ -77,8 +74,51 @@ void loop()
 
   Serial.print("Motor Direction:  ");
   Serial.println(wheelState);
+}
 
-  //  prevEnableState = enableState;
+void turnMotorsOff()
+{
+  analogWrite(enablePin[0], 0);
+  analogWrite(enablePin[1], 0);
+  analogWrite(enablePin[2], 0);
+  analogWrite(enablePin[3], 0);
+
+  for(int i = 0; i < 8; i++)
+  {
+    digitalWrite(motorPin[i], LOW);
+  }  
+  
+  Serial.println("Motors off?");
+  delay(1000);
+}
+
+void driveOutHopper()
+{
+  Serial.println("Got to third checkpoint");
+  delay(1000);      
+  prevDir = dir;
+  sensor(sensorNum);
+
+  Serial.print("Distance: ");
+  Serial.println(distance);
+  Serial.print("Previous Distance: ");
+  Serial.println(prevDistance);
+  delay(5000);
+
+  while(distance <= prevDistance)
+  {
+    sensor(2);
+    movement(0);
+  }
+  
+  Serial.println("Drove out of hopper");
+  delay(1000);
+  
+  turnMotorsOff();      
+  
+  dir = rotateRobot(prevDir);
+  sensorNum = 0;  
+  backingUp = 0;
 }
 
 void keepDriving()
@@ -87,6 +127,7 @@ void keepDriving()
   {
     digitalWrite(LEDPin1, LOW);
     digitalWrite(LEDPin2, HIGH);    
+    turnMotorsOff();
     if(dir == 1)
     {
       Serial.println("Got to first checkpoint");
@@ -98,37 +139,17 @@ void keepDriving()
     }
     else if (dir == 0)
     {
-//      if(prevDir == 2)
-//      {
-//        prevDir = 0;
-//        dir = 0;
-//        Serial.println("Got to fifth checkpoint");
-//        delay(1000);        
-//      }
-//      else
-//      {
         Serial.println("Going to board");
         delay(1000);
         prevDir = dir;
         dir = 3;
         sensorNum = 3;
-//      }
     }
     else if (dir == 2)
     {
       Serial.println("Got to third checkpoint");
       delay(1000);      
-      prevDir = dir;
-      sensorNum = 0;
-      sensor(sensorNum);
-
-      while(distance <= prevDistance)
-      {
-        sensor(0);
-        movement(sensorNum);
-      }
-
-      dir = rotateRobot(prevDir);
+      backingUp = 1;
     }
   }
   else if (distance >= maxRange){
@@ -141,55 +162,66 @@ void keepDriving()
 int rotateRobot(int whichWay)
 {
   int lastTime = millis();
+  int currentTime = millis();
+  int newDir;    
+
+  turnMotorsOff();
 
   if(whichWay == 1)
   {
     Serial.println("Got to second checkpoint");
     delay(1000);
     analogWrite(enablePin[2], 175);
-    analogWrite(enablePin[3], 125);
-
-    while(millis() - lastTime < 1000)
-    {
-      digitalWrite(motorPin[4], !highLow);
-      digitalWrite(motorPin[5], highLow);
-      digitalWrite(motorPin[6], highLow);
-      digitalWrite(motorPin[7], !highLow);      
-    }
-
+    analogWrite(enablePin[3], 175);
+    
     digitalWrite(motorPin[4], LOW);
-    digitalWrite(motorPin[5], LOW);
-    digitalWrite(motorPin[6], LOW);
-    digitalWrite(motorPin[7], LOW);      
-
+    digitalWrite(motorPin[5], HIGH);
+    digitalWrite(motorPin[6], HIGH);
+    digitalWrite(motorPin[7], LOW);        
+    while(currentTime - lastTime < 3000)
+    {
+      currentTime = millis();
+      Serial.print("Last time: ");
+      Serial.println(lastTime);
+      Serial.print("Current time: ");
+      Serial.println(currentTime);
+      delay(1000);  
+    }
     maxRange = 5;
 
-    return 2;
+    newDir = 2;
   }
   else if (whichWay == 2)
   {
     Serial.println("Got to fourth checkpoint");
     delay(1000);    
     analogWrite(enablePin[2], 175);
-    analogWrite(enablePin[3], 125);
+    analogWrite(enablePin[3], 175);
 
-    while(millis() - lastTime < 1000)
+    digitalWrite(motorPin[4], highLow);
+    digitalWrite(motorPin[5], !highLow);
+    digitalWrite(motorPin[6], !highLow);
+    digitalWrite(motorPin[7], highLow);   
+    while(millis() - lastTime < 3000)
     {
-      digitalWrite(motorPin[4], highLow);
-      digitalWrite(motorPin[5], !highLow);
-      digitalWrite(motorPin[6], !highLow);
-      digitalWrite(motorPin[7], highLow);       
-    } 
-
-    digitalWrite(motorPin[4], LOW);
-    digitalWrite(motorPin[5], LOW);
-    digitalWrite(motorPin[6], LOW);
-    digitalWrite(motorPin[7], LOW);      
+      currentTime = millis();
+      Serial.print("Last time: ");
+      Serial.println(lastTime);
+      Serial.print("Current time: ");
+      Serial.println(currentTime);
+      delay(1000);        
+    }    
 
     maxRange = 25;
 
-    return 0;    
+    newDir = 0;    
   }
+  digitalWrite(motorPin[4], LOW);
+  digitalWrite(motorPin[5], LOW);
+  digitalWrite(motorPin[6], LOW);
+  digitalWrite(motorPin[7], LOW); 
+  
+  return newDir;  
 }
 
 void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is left, -1 is nothing
@@ -223,10 +255,10 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
   {
     analogWrite(enablePin[0], 175);
     analogWrite(enablePin[1], 175);
-    digitalWrite(motorPin[0], highLow);
-    digitalWrite(motorPin[1], !highLow);
-    digitalWrite(motorPin[2], highLow);
-    digitalWrite(motorPin[3], !highLow);
+    digitalWrite(motorPin[0], !highLow);
+    digitalWrite(motorPin[1], highLow);
+    digitalWrite(motorPin[2], !highLow);
+    digitalWrite(motorPin[3], highLow);
     digitalWrite(motorPin[4], LOW);
     digitalWrite(motorPin[5], LOW);
     digitalWrite(motorPin[6], LOW);

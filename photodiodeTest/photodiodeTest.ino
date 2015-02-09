@@ -1,4 +1,4 @@
-int analogInPin = 4;
+int analogInPin = 5;
 int circuitReading;
 int previousReading = 0;
 int counter = 0;
@@ -6,7 +6,7 @@ int counter = 0;
 
 void setup()
 {
-  Serial.begin(4800);
+  Serial.begin(19200);
   pinMode(analogInPin, INPUT);
 }
 
