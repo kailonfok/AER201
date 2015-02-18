@@ -1,3 +1,8 @@
+// Servo declarations
+#include <Servo.h> 
+Servo myservo;  // create servo object to control a servo
+int pos = 0;
+
 // define constants for sonar sensors
 const int echoPin[] = {
   22,24,26,28}; // Echo Pin
@@ -16,7 +21,6 @@ const int enablePin[] = {
   2,3,4,5}; // Starts from top, going clockwise
 
 long duration, distance;
-long prevDistance = 0;
 
 int wheelState = 0;
 
@@ -24,11 +28,15 @@ int dir = 1; // 0 - front, 1 - right, 2 - back, 3 - left
 int prevDir = 2;
 int sensorNum = 1;
 boolean highLow = 0;
-boolean backingUp = 0;
+
+boolean atHopper = false; // variable to determine if at hopper
+boolean atBoard = false; // variable to determine if at board
 
 void setup()
 {
   Serial.begin(9600);
+
+  myservo.attach(40); // attach servo to pin 40 to servo object
 
   pinMode(LEDPin1, OUTPUT);
   pinMode(LEDPin2, OUTPUT);  
@@ -52,15 +60,20 @@ void loop()
 
   Serial.print("The distance is: ");
 
-  if(backingUp == 0)
-  {    
+
+  if (!atHopper && !atBoard)
+  {
     keepDriving();
   }
-  else
+  else if (atHopper)
   {
-    driveOutHopper();
+    dir = closeClaw();
+    atHopper = false;
   }
-    
+  else if (atBoard)
+  {
+    atBoard = false;
+  }
 
   Serial.println(distance);
   Serial.print("Previous direction: ");
@@ -81,38 +94,9 @@ void turnMotorsOff()
   {
     digitalWrite(motorPin[i], LOW);
   }  
-  
-  Serial.println("Motors off?");
+
+  Serial.println("Motors off");
   delay(1000);
-}
-
-void driveOutHopper()
-{
-  Serial.println("Got to third checkpoint");
-  delay(1000);      
-  prevDir = dir;
-  sensor(sensorNum);
-
-  Serial.print("Distance: ");
-  Serial.println(distance);
-  Serial.print("Previous Distance: ");
-  Serial.println(prevDistance);
-  delay(5000);
-
-  while(distance <= prevDistance)
-  {
-    sensor(2);
-    movement(0);
-  }
-  
-  Serial.println("Drove out of hopper");
-  delay(1000);
-  
-//  turnMotorsOff();      
-  
-  dir = rotateRobot(prevDir);
-  sensorNum = 0;  
-  backingUp = 0;
 }
 
 void keepDriving()
@@ -124,26 +108,27 @@ void keepDriving()
     turnMotorsOff();
     if(dir == 1)
     {
-      Serial.println("Got to first checkpoint");
+      Serial.println("Got to first hopper");
       delay(1000);
       prevDir = dir;
-      prevDistance = distance;
-      dir = rotateRobot(prevDir);
-      sensorNum = 2;
+      atHopper = true;
+      sensorNum = 0;
     }
     else if (dir == 0)
     {
-        Serial.println("Going to board");
-        delay(1000);
-        prevDir = dir;
-        dir = 3;
-        sensorNum = 3;
+      Serial.println("Going to board");
+      delay(1000);
+      prevDir = dir;
+      maxRange = 90;
+      dir = 3;
+      sensorNum = 3;
     }
-    else if (dir == 2)
+    else if (dir == 3)
     {
-      Serial.println("Got to third checkpoint");
-      delay(1000);      
-      backingUp = 1;
+      Serial.println("Got to game board");
+      delay(1000);
+      prevDir = dir;
+      atBoard = true;
     }
   }
   else if (distance >= maxRange){
@@ -151,68 +136,6 @@ void keepDriving()
     digitalWrite(LEDPin2, LOW);
     movement(dir);    
   }  
-}
-
-int rotateRobot(int whichWay)
-{
-  int lastTime = millis();
-  int currentTime = millis();
-  int newDir;    
-
-//  turnMotorsOff();
-
-  if(whichWay == 1)
-  {
-    Serial.println("Got to second checkpoint");
-    delay(1000);
-    analogWrite(enablePin[2], 175);
-    analogWrite(enablePin[3], 175);
-    
-    digitalWrite(motorPin[4], LOW);
-    digitalWrite(motorPin[5], HIGH);
-    digitalWrite(motorPin[6], HIGH);
-    digitalWrite(motorPin[7], LOW);        
-    while(currentTime - lastTime < 3000)
-    {
-      currentTime = millis();
-      Serial.print("Last time: ");
-      Serial.println(lastTime);
-      Serial.print("Current time: ");
-      Serial.println(currentTime);
-      delay(1000);  
-    }
-    maxRange = 5;
-
-    newDir = 2;
-  }
-  else if (whichWay == 2)
-  {
-    Serial.println("Got to fourth checkpoint");
-    delay(1000);    
-    analogWrite(enablePin[2], 175);
-    analogWrite(enablePin[3], 175);
-
-    digitalWrite(motorPin[4], highLow);
-    digitalWrite(motorPin[5], !highLow);
-    digitalWrite(motorPin[6], !highLow);
-    digitalWrite(motorPin[7], highLow);  
-    
-    while(millis() - lastTime < 3000)
-    {
-      currentTime = millis();
-      Serial.print("Last time: ");
-      Serial.println(lastTime);
-      Serial.print("Current time: ");
-      Serial.println(currentTime);
-      delay(1000);        
-    }    
-
-    maxRange = 15;
-
-    newDir = 0;    
-  }
-  
-  return newDir;  
 }
 
 void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is left, -1 is nothing
@@ -237,43 +160,26 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
     Serial.println("Moving left");     
     highLow = 0;
   }
-  else
-  {
-    Serial.println("Don't need to move");
-  }
 
   if(motorDirection == 0 || motorDirection == 2)
   {
     analogWrite(enablePin[0], 175);
     analogWrite(enablePin[1], 175);
+
     digitalWrite(motorPin[0], !highLow);
     digitalWrite(motorPin[1], highLow);
     digitalWrite(motorPin[2], !highLow);
-    digitalWrite(motorPin[3], highLow);
-    digitalWrite(motorPin[4], LOW);
-    digitalWrite(motorPin[5], LOW);
-    digitalWrite(motorPin[6], LOW);
-    digitalWrite(motorPin[7], LOW);            
+    digitalWrite(motorPin[3], highLow);         
   }
   else if(motorDirection == 1 || motorDirection == 3)
   {
     analogWrite(enablePin[2], 200);
     analogWrite(enablePin[3], 200);          
-    digitalWrite(motorPin[0], LOW);
-    digitalWrite(motorPin[1], LOW);
-    digitalWrite(motorPin[2], LOW);
-    digitalWrite(motorPin[3], LOW);    
+
     digitalWrite(motorPin[4], highLow);
     digitalWrite(motorPin[5], !highLow);
     digitalWrite(motorPin[6], highLow);
     digitalWrite(motorPin[7], !highLow);    
-  }
-  else
-  {
-    for(int i = 0; i < 8; i++)
-    {
-      digitalWrite(motorPin[i], 0);
-    }
   }
 }
 
@@ -292,4 +198,30 @@ void sensor(int sensorNum)
   distance = duration/distanceConstant;  
 
   delay(50);
+}
+
+// Beginning of functions for retrieval of ping pong ball
+
+int closeClaw()
+{
+  for(pos = 0; pos < 180; pos += 1)  // goes from 0 degrees to 180 degrees 
+  {                                  // in steps of 1 degree 
+    myservo.write(pos);              // tell servo to go to position in variable 'pos' 
+    delay(15);                       // waits 15ms for the servo to reach the position 
+  }
+
+  return 0; 
+}
+
+// Code for depositing the ball (2 functions)
+void liftArm()
+{
+}
+
+void openClaw()
+{
+}
+
+int lowerArm()
+{
 }
