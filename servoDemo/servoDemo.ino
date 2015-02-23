@@ -4,6 +4,7 @@ Servo myservo;  // create servo object to control a servo
 // a maximum of eight servo objects can be created 
 
 int pos = 0;    // variable to store the servo position 
+int temp = 0;
 
 void setup() 
 { 
@@ -13,16 +14,18 @@ void setup()
 
 void loop() 
 { 
-  delay(15);
-  for(pos = 0; pos <= 160; pos += 1)  // goes from 0 degrees to 180 degrees 
-  {                                  // in steps of 1 degree 
-    myservo.write(pos);              // tell servo to go to position in variable 'pos' 
-    delay(20);                       // waits 15ms for the servo to reach the position 
+  if (!temp)
+  {
+    for(pos = 180; pos >= 0; pos -= 1)  // goes from 0 degrees to 180 degrees 
+    {                                  // in steps of 1 degree 
+      myservo.write(pos);              // tell servo to go to position in variable 'pos' 
+      delay(20);                       // waits 15ms for the servo to reach the position 
+    }
+    temp = 1;
   } 
-  for(pos = 160; pos>=0; pos-=1)     // goes from 180 degrees to 0 degrees 
-  {                                
-    myservo.write(pos);              // tell servo to go to position in variable 'pos' 
-    delay(20);                       // waits 15ms for the servo to reach the position 
+  else
+  {
+    myservo.attach(9);
   }
 }
 
