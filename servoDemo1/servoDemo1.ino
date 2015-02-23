@@ -4,7 +4,7 @@ Servo leftServo;  // create servo object to control a servo
 // a maximum of eight servo objects can be created 
 Servo rightServo;
 
-int leftPos = 0;    // variable to store the servo position 
+int leftPos = 10;    // variable to store the servo position 
 int rightPos = 167;
 
 const int enableButPin = 40;
@@ -18,7 +18,7 @@ void setup()
   leftServo.attach(52);  // attaches the servo on pin 9 to the servo object 
   rightServo.attach(53);
   
-  leftServo.write(0);
+  leftServo.write(10);
   rightServo.write(167);
   delay(50);
   pinMode(enableButPin, INPUT);
@@ -55,7 +55,7 @@ void loop()
       rightPos--;
       leftPos++;
            
-    }while(leftPos != 70 && rightPos != 97);
+    }while(leftPos != 170);// && rightPos != 97);
   } 
   else
   {
