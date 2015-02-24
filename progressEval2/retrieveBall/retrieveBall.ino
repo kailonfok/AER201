@@ -2,8 +2,8 @@
 Servo leftServo;
 Servo rightServo;
 
-int leftPos = 0; // Starting positions for servo claws
-int rightPos = 180;
+int leftPos = 7; // Starting positions for servo claws
+int rightPos = 208;
 boolean onOff = 1;
 boolean start;
 
@@ -15,7 +15,7 @@ const int maxRange = 10;
 const int motorPin[] = {36,37,38,39};
 const int enablePin[] = {2, 3};
 
-const int enableButPin = 21;
+const int enableButPin = 50;
 boolean enableState = 0;
 boolean prevEnableState = 0;
 
@@ -39,11 +39,12 @@ void setup()
       pinMode(echoPin[i], INPUT);
 //      pinMode(enablePin[i], OUTPUT);
     }
-    pinMode(enableButPin, INPUT);
   }
+  pinMode(enableButPin, INPUT);  
   // set servos into appropriate position
   leftServo.write(leftPos);
   rightServo.write(rightPos);
+  delay(50);
 }
 
 void loop()
@@ -55,18 +56,21 @@ void loop()
   {
     if(enableState) // if switched to on
     {
-      start = 1;
+      start = !start;
     }
-    else
-    {
-      start = 0;
-    }
+//    else
+//    {
+//      start = 0;
+//    }
   }
-
+  
+  Serial.println(start);
   if(start)
   {  
     if (dir == 1) // first retrieve the ball
+    {
       dir = closeClaw(); // change direction to forward
+    }
     else
     {
       sensor(sensorNum);
@@ -84,6 +88,7 @@ void loop()
   }
   else
   {
+    Serial.println("Done!");    
     analogWrite(enablePin[0], LOW);
     analogWrite(enablePin[1], LOW);    
   }
@@ -97,7 +102,7 @@ void keepDriving()
   digitalWrite(enablePin[1], LOW);
   if (distance >= maxRange)
   {   
-    Serial.println("Done!");
+    start = 0;
   }
   else if (distance <= maxRange){
     movement(dir);    
@@ -146,16 +151,16 @@ void sensor(int sensorNum)
 int closeClaw()
 {
   Serial.println("Closing claw");
+  
   do // loop to close the claws (left and right claws go 180 degrees)
   {
     leftServo.write(leftPos);
     delay(15);
     rightServo.write(rightPos);
-    delay(15);
-    rightPos--;
+    rightPos -= 2;
     leftPos++;
          
-  }while(leftPos != 180 && rightPos != 0);
+  }while(leftPos != 47 && rightPos != 98);  
 
   return 0; 
 }

@@ -3,12 +3,13 @@ Servo leftServo;
 Servo rightServo;
 Servo armServo;
 
-int leftPos = 180; // Starting positions for servo claws
-int rightPos = 0;
-int armPos = 0;
+int leftPos = 7; // Starting positions for servo claws
+int rightPos = 208;
+int armPos = 165;
 boolean start;
+int temp;
 
-const int enableButPin = 21;
+const int enableButPin = 50;
 int enableState = 0;
 int prevEnableState = 0;
 
@@ -25,6 +26,9 @@ void setup()
   leftServo.write(leftPos);
   rightServo.write(rightPos);
   armServo.write(armPos);
+  delay(50);
+  
+  closeClaw();
   
   pinMode(enableButPin, INPUT);
 }
@@ -38,31 +42,38 @@ void loop()
   if(enableState != prevEnableState)
   {
     if(enableState)
-      start = 1;
-    else
-      start = 0;
+      start = !start;
   }
   
   if(start)
   {
-    if(moveArm(1)) //raise arm, when raised go into next step
+//    temp = moveArm(-1);
+    if(moveArm(-1))
     {
-      if(openClaw()) // open claw, when opened go to next step
+      Serial.println("First checkpoint");
+  //    temp = openClaw();
+      if(openClaw())
       {
-        moveArm(-1); // lower arm back down
+        moveArm(1);
       }
+    }
+    else
+    {
+      Serial.println("Done!");
     }
   }
 }
 
-boolean moveArm(int upDown) // 1 for up, -1 for down
+boolean moveArm(int upDown) // -1 for up, 1 for down
 {
+  boolean value;
+  boolean exit = 1;
   // loop until all the way up/down
-  if(upDown)
+  if(upDown == -1)
   {
     Serial.println("Raising arm");
   }
-  else
+  else if (upDown == 1)
   {
     Serial.println("Lowering arm");
   }
@@ -72,9 +83,22 @@ boolean moveArm(int upDown) // 1 for up, -1 for down
     armServo.write(armPos);
     delay(15);
     armPos += upDown;
-  }while(armPos != 0 || armPos != 180);
-   
-  return 1;
+    Serial.println("Stuck??");
+    if(armPos == 40 || armPos == 170)
+      exit = 0;
+  }while(exit == 1);
+  
+  Serial.println("Reaching end of loop");
+  
+  if(upDown == -1)
+    value = 1;
+  else
+  {
+    value = 0;
+    start = 0;
+  }
+    
+  return value;   
 }
 
 boolean openClaw()
@@ -83,14 +107,37 @@ boolean openClaw()
   do // loop to open the claws (left and right claws go 180 degrees)
   {
     leftServo.write(leftPos);
-    delay(15);
     rightServo.write(rightPos);
     delay(15);
     //increment/decrement the right and left claw positions each iteration
-    rightPos++;
+    rightPos += 2;
     leftPos--;
       
-  }while(leftPos != 0 && rightPos != 180);
+  }while(leftPos != 7 && rightPos != 208);
+  
+  if (moveArm(1))
+  {
+    return 1;   
+  }
+  else
+  {
+    return 0;
+  }
+}
 
-  return 1;   
+int closeClaw()
+{
+  Serial.println("Closing claw");
+  
+  do // loop to close the claws (left and right claws go 180 degrees)
+  {
+    leftServo.write(leftPos);
+    delay(15);
+    rightServo.write(rightPos);
+    rightPos -= 2;
+    leftPos++;
+         
+  }while(leftPos != 47 && rightPos != 98);  
+
+  return 0; 
 }
