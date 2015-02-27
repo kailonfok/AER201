@@ -12,7 +12,7 @@ const int trigPin[] = {25,23};
 const float distanceConstant = 58.2;
 const int maxRange = 10;
 
-const int motorPin[] = {36,37,38,39};
+const int motorPin[] = {32,33,34,35};
 const int enablePin[] = {2, 3};
 
 const int enableButPin = 50;
@@ -58,10 +58,6 @@ void loop()
     {
       start = !start;
     }
-//    else
-//    {
-//      start = 0;
-//    }
   }
   
   Serial.println(start);
@@ -69,7 +65,7 @@ void loop()
   {  
     if (dir == 1) // first retrieve the ball
     {
-      dir = closeClaw(); // change direction to forward
+      dir = closeClaw(); // change direction to forward      
     }
     else
     {
@@ -125,8 +121,8 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
     Serial.println("Moving backwards");
     highLow = 0;
   }
-    digitalWrite(motorPin[0], highLow);
-    digitalWrite(motorPin[1], !highLow);
+    digitalWrite(motorPin[0], !highLow);
+    digitalWrite(motorPin[1], highLow);
     digitalWrite(motorPin[2], highLow);
     digitalWrite(motorPin[3], !highLow);
 }

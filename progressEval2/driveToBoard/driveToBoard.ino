@@ -7,7 +7,7 @@ const int LEDPin1 = 52; // red LED for out of range
 const int LEDPin2 = 53; // blue LED for in range
 const float distanceConstant = 58.2;
 
-int maxRange = 15;
+int maxRange = 12;
 
 //define constants for motors
 const int motorPin[] = {
@@ -17,12 +17,16 @@ const int enablePin[] = {
 
 long duration, distance;
 
-int wheelState = 0;
-
 int dir = 1; // 0 - front, 1 - right, 2 - back, 3 - left
 int prevDir = 2;
 int sensorNum = 1;
 boolean highLow = 0;
+
+//enable pin to start
+boolean start = 0;
+const int enableButPin = 50;
+int enableState = 0;
+int prevEnableState = 0;
 
 void setup()
 {
@@ -40,26 +44,46 @@ void setup()
       pinMode(echoPin[i], INPUT);
     }
   }
+  pinMode(enableButPin, INPUT);
 }
 
 void loop()
 {
-  //Every iteration, check distance to wall
-  sensor(sensorNum);
-  Serial.print("Sensor Number: ");
-  Serial.println(sensorNum);
-
-  // function call to determine if at wall or not
-  keepDriving();    
-
-  // diagnostic outputs
-  Serial.print("The distance is: ");    
-  Serial.println(distance);
-  Serial.print("Previous direction: ");
-  Serial.println(prevDir);
-
-  Serial.print("Motor Direction:  ");
-  Serial.println(wheelState);
+  enableState = digitalRead(enableButPin);
+  delay(1);
+  
+  if(enableState != prevEnableState)
+  {
+    if(enableState)
+      start = !start;
+  }
+  
+  if(start)
+  {  
+    //Every iteration, check distance to wall
+    sensor(sensorNum);
+    Serial.print("Sensor Number: ");
+    Serial.println(sensorNum);
+  
+    // function call to determine if at wall or not
+    keepDriving();    
+  
+    // diagnostic outputs
+    Serial.print("The distance is: ");    
+    Serial.println(distance);
+    Serial.print("Previous direction: ");
+    Serial.println(prevDir);
+  
+    Serial.print("Motor Direction:  ");
+    Serial.println(dir);
+  }
+  else
+  {
+    digitalWrite(LEDPin1, HIGH);
+    digitalWrite(LEDPin2, HIGH);       
+    Serial.println("Don't do anything");
+    delay(1000);
+  }  
 }
 
 // Function to turn off motors, before switching directions
@@ -105,7 +129,7 @@ void keepDriving()
         prevDir = dir;
         dir = 3;
         sensorNum = 3;
-        maxRange = 60;
+        maxRange = 65;
     }
     else if (dir == 2)
     {
@@ -114,7 +138,7 @@ void keepDriving()
       prevDir = dir;
       dir = -1;
       sensorNum = 1; // There needs to be some logic here to then place ball and return to last hopper
-      maxRange = 15;
+      maxRange = 12;
     }
   }
   else if (distance >= maxRange){ // Not close enough, keep driving in direction
@@ -155,12 +179,12 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
   // Write voltages to enable pins, and direct current through H-bridge (need to modify analogWrite values)
   if(motorDirection == 0 || motorDirection == 2)
   {
-    analogWrite(enablePin[0], 175);
-    analogWrite(enablePin[1], 175);
+    analogWrite(enablePin[0], 175); // direct left wheel
+    analogWrite(enablePin[1], 175); // direct right wheel
     digitalWrite(motorPin[0], !highLow);
     digitalWrite(motorPin[1], highLow);
-    digitalWrite(motorPin[2], !highLow);
-    digitalWrite(motorPin[3], highLow);
+    digitalWrite(motorPin[2], highLow);
+    digitalWrite(motorPin[3], !highLow);
     // turn unwanted motors off (safety check)
     digitalWrite(motorPin[4], LOW);
     digitalWrite(motorPin[5], LOW);
@@ -169,17 +193,17 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
   }
   else if(motorDirection == 1 || motorDirection == 3)
   {
-    analogWrite(enablePin[2], 200);
-    analogWrite(enablePin[3], 200);          
+    analogWrite(enablePin[2], 100); // direct front wheel
+    analogWrite(enablePin[3], 175); // direct back wheel         
     // turn unwanted motors off (safety check)    
     digitalWrite(motorPin[0], LOW);
     digitalWrite(motorPin[1], LOW);
     digitalWrite(motorPin[2], LOW);
     digitalWrite(motorPin[3], LOW);    
-    digitalWrite(motorPin[4], highLow);
-    digitalWrite(motorPin[5], !highLow);
-    digitalWrite(motorPin[6], highLow);
-    digitalWrite(motorPin[7], !highLow);    
+    digitalWrite(motorPin[4], !highLow);
+    digitalWrite(motorPin[5], highLow);
+    digitalWrite(motorPin[6], !highLow);
+    digitalWrite(motorPin[7], highLow);    
   }
   else
   {
