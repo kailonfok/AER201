@@ -62,12 +62,16 @@ void loop()
   enableState = digitalRead(enableButPin);
   delay(1);
   
+  Serial.print("Enable State: ");
+  Serial.println(enableState);
+  
   // on/off switch
   if(enableState != prevEnableState)
   {
     if(enableState)
       start = !start;
   }
+  Serial.println(start);
   
   if(start)
   {
@@ -257,7 +261,9 @@ boolean moveArm(int upDown) // -1 for up, 1 for down
   Serial.println("Reaching end of loop");
   
   if(upDown == -1)
+  {
     value = 1;
+  }
   else
   {
     value = 0;
@@ -281,14 +287,15 @@ boolean openClaw()
       
   }while(leftPos != 7 && rightPos != 208);
   
-  if (moveArm(1))
-  {
-    return 1;   
-  }
-  else
-  {
-    return 0;
-  }
+//  if (moveArm(1))
+//  {
+//    return 1;   
+//  }
+//  else
+//  {
+//    return 0;
+//  }
+  return 1;
 }
 
 int closeClaw()
