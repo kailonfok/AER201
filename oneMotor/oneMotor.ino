@@ -1,5 +1,5 @@
-const int motorPins[] = {32,33,34,35};
-const int enablePin[] = {2,3};
+const int motorPins[] = {34,35,36,37};
+const int enablePin[] = {4,5};
 
 void setup()
 {
@@ -13,14 +13,14 @@ void setup()
 
 void  loop()
 {
-  analogWrite(enablePin[0], 155);
-  analogWrite(enablePin[1], 155);
+  analogWrite(enablePin[0], 117);
+  analogWrite(enablePin[1], 175);
 
 //  digitalWrite(enablePin[0], HIGH);
 //  digitalWrite(enablePin[1], HIGH);
   
   digitalWrite(motorPins[1], HIGH);
   digitalWrite(motorPins[0], LOW);
-  digitalWrite(motorPins[2], HIGH);
-  digitalWrite(motorPins[3], LOW);
+  digitalWrite(motorPins[2], LOW);
+  digitalWrite(motorPins[3], HIGH);
 }

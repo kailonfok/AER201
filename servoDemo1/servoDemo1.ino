@@ -7,7 +7,7 @@ Servo rightServo;
 int leftPos = 170;    // variable to store the servo position 
 int rightPos = 167;
 
-const int enableButPin = 50;
+const int enableButPin = 40;
 int enableState = 0;
 int prevEnableState = 0;
 boolean start;
@@ -15,7 +15,7 @@ boolean start;
 void setup() 
 { 
   Serial.begin(4800);
-  leftServo.attach(51);  // attaches the servo on pin 9 to the servo object 
+  leftServo.attach(52);  // attaches the servo on pin 9 to the servo object 
   rightServo.attach(53);
   
   leftServo.write(leftPos);
@@ -53,9 +53,9 @@ void loop()
       delay(15);
       rightServo.write(rightPos);
       rightPos--;
-      leftPos--;
+      leftPos++;
            
-    }while(leftPos != 70);// && rightPos != 97);
+    }while(leftPos != 170);// && rightPos != 97);
   } 
   else
   {

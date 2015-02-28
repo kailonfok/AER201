@@ -23,7 +23,7 @@ int sensorNum = 1;
 boolean highLow = 0;
 
 //enable pin to start
-boolean start = 0;
+boolean start;
 const int enableButPin = 50;
 int enableState = 0;
 int prevEnableState = 0;
@@ -196,8 +196,8 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
   }
   else if(motorDirection == 1 || motorDirection == 3)
   {
-    analogWrite(enablePin[2], 100); // Direct front wheel
-    analogWrite(enablePin[3], 155); // Direct back wheel         
+    analogWrite(enablePin[2], 117); // Direct front wheel
+    analogWrite(enablePin[3], 175); // Direct back wheel         
     // turn unwanted motors off (safety check)    
     digitalWrite(motorPin[0], LOW);
     digitalWrite(motorPin[1], LOW);

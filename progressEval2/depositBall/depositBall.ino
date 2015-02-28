@@ -6,7 +6,7 @@ Servo armServo;
 int leftPos = 7; // Starting positions for servo claws
 int rightPos = 208;
 int armPos = 165;
-boolean start = 0;
+boolean start;
 boolean inPosition = 0;
 
 // define constants for sonar sensors

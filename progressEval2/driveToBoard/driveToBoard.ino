@@ -23,7 +23,7 @@ int sensorNum = 1;
 boolean highLow = 0;
 
 //enable pin to start
-boolean start = 0;
+boolean start;
 const int enableButPin = 50;
 int enableState = 0;
 int prevEnableState = 0;

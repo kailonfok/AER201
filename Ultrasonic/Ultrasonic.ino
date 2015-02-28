@@ -11,9 +11,9 @@
  on 10 Nov 2012.
  */
 
+#define echoPin 28 // Echo Pin
+#define trigPin 29 // Trigger Pin
 
-#define echoPin 22 // Echo Pin
-#define trigPin 23 // Trigger Pin
 #define LEDPin1 52 // red LED for out of range
 #define LEDPin2 53 // green LED for in range
 const float distanceConstant = 58.2;
