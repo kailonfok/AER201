@@ -7,15 +7,15 @@ int rightPos = 180;
 boolean onOff = 1;
 boolean start;
 
-const int echoPin[] = {24,22};
-const int trigPin[] = {25,23};
+const int echoPin[] = {26,22};
+const int trigPin[] = {27,23};
 const float distanceConstant = 58.2;
-const int maxRange = 10;
+const int maxRange = 20;
 
-const int motorPin[] = {32,33,34,35};
+const int motorPin[] = {30,31,32,33};
 const int enablePin[] = {2, 3};
 
-const int enableButPin = 21;
+const int enableButPin = 50;
 boolean enableState = 0;
 boolean prevEnableState = 0;
 
@@ -57,22 +57,18 @@ void loop()
     {
       start = 1;
     }
-    else
-    {
-      start = 0;
-    }
   }
+  
+  
+  Serial.print("Start: ");
+  Serial.println(start);
 
   if(start)
   {  
     if (dir == 1) // first retrieve the ball
-<<<<<<< HEAD
     {
       dir = closeClaw(); // change direction to forward      
     }
-=======
-      dir = closeClaw(); // change direction to forward
->>>>>>> parent of 46d69c9... Fine tuned retrieval and depositing of ball
     else
     {
       sensor(sensorNum);
@@ -104,6 +100,7 @@ void keepDriving()
   if (distance >= maxRange)
   {   
     Serial.println("Done!");
+    start = 0;
   }
   else if (distance <= maxRange){
     movement(dir);    
@@ -113,8 +110,8 @@ void keepDriving()
 void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is left, -1 is nothing
 {
   boolean highLow = 0;
-  analogWrite(enablePin[0], 153);
-  analogWrite(enablePin[1], 165);  
+  analogWrite(enablePin[0], 255);
+  analogWrite(enablePin[1], 255);  
 
   if(motorDirection == 0)
   {
@@ -158,10 +155,10 @@ int closeClaw()
     delay(15);
     rightServo.write(rightPos);
     delay(15);
-    rightPos--;
+    rightPos-=1.5;
     leftPos++;
          
-  }while(leftPos != 180 && rightPos != 0);
+  }while(leftPos != 70 && rightPos != 110);
 
   return 0; 
 }

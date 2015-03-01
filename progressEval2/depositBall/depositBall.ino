@@ -3,9 +3,9 @@ Servo leftServo;
 Servo rightServo;
 Servo armServo;
 
-int leftPos = 7; // Starting positions for servo claws
-int rightPos = 208;
-int armPos = 165;
+int leftPos = 0; // Starting positions for servo claws
+int rightPos = 180;
+int armPos = 170;
 boolean start;
 boolean inPosition = 0;
 
@@ -18,11 +18,11 @@ const int LEDPin1 = 52; // red LED for out of range
 const int LEDPin2 = 53; // blue LED for in range
 const float distanceConstant = 58.2;
 
-int maxRange = 55;
+int maxRange = 5;
 
 //define constants for motors
 const int motorPin[] = {
-  32,33,34,35,36,37,38,39};
+  30,31,32,33,34,35,36,37};
 const int enablePin[] = {
   2,3,4,5}; // Starts from top, going clockwise
 
@@ -46,6 +46,17 @@ void setup()
   leftServo.attach(52);
   rightServo.attach(53);  
   
+  for(int i = 0; i < 8; i++)
+  {
+    pinMode(motorPin[i], OUTPUT);
+    if (i < 4)
+    {
+      pinMode(trigPin[i], OUTPUT);
+      pinMode(echoPin[i], INPUT);
+//      pinMode(enablePin[i], OUTPUT);
+    }  
+  }
+  
   // set servos to designated starting positions
   leftServo.write(leftPos);
   rightServo.write(rightPos);
@@ -62,22 +73,31 @@ void loop()
   enableState = digitalRead(enableButPin);
   delay(1);
   
-  Serial.print("Enable State: ");
-  Serial.println(enableState);
-  
   // on/off switch
   if(enableState != prevEnableState)
   {
     if(enableState)
       start = !start;
   }
+  
+  Serial.print("Start: ");
   Serial.println(start);
   
   if(start)
   {
     if(!inPosition)
     {
+      sensor(sensorNum);
+      Serial.print("Sensor Number: ");
+      Serial.println(sensorNum);
+      
       inPosition = keepDriving();
+      
+      Serial.print("The distance is: ");  
+      Serial.println(distance);
+      
+      Serial.print("The direction is: ");
+      Serial.println(dir);
     }
     else
     {
@@ -193,8 +213,8 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
   }
   else if(motorDirection == 1 || motorDirection == 3)
   {
-    analogWrite(enablePin[2], 100); // Direct front wheel
-    analogWrite(enablePin[3], 155); // Direct back wheel         
+    analogWrite(enablePin[2], 150); // Direct front wheel
+    analogWrite(enablePin[3], 200); // Direct back wheel         
     // turn unwanted motors off (safety check)    
     digitalWrite(motorPin[0], LOW);
     digitalWrite(motorPin[1], LOW);
@@ -282,19 +302,11 @@ boolean openClaw()
     rightServo.write(rightPos);
     delay(15);
     //increment/decrement the right and left claw positions each iteration
-    rightPos += 2;
+    rightPos += 1.5;
     leftPos--;
       
-  }while(leftPos != 7 && rightPos != 208);
+  }while(leftPos != 0 && rightPos != 180);
   
-//  if (moveArm(1))
-//  {
-//    return 1;   
-//  }
-//  else
-//  {
-//    return 0;
-//  }
   return 1;
 }
 
@@ -307,10 +319,10 @@ int closeClaw()
     leftServo.write(leftPos);
     delay(15);
     rightServo.write(rightPos);
-    rightPos -= 2;
+    rightPos -= 1.5;
     leftPos++;
          
-  }while(leftPos != 47 && rightPos != 98);  
+  }while(leftPos != 70 && rightPos != 110);  
 
   return 0; 
 }

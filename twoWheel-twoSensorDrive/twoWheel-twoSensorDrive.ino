@@ -1,10 +1,10 @@
-const int echoPin[] = {24,22};
-const int trigPin[] = {25,23};
+const int echoPin[] = {24,28};
+const int trigPin[] = {25,29};
 const float distanceConstant = 58.2;
-const int maxRange = 5;
+const int maxRange = 10;
 
-const int motorPin[] = {36,37,38,39};
-const int enablePin[] = {2, 3};
+const int motorPin[] = {34,35,36,37};
+const int enablePin[] = {4, 5};
 
 long duration, distance;
 
