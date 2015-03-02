@@ -11,12 +11,12 @@ int maxRange = 12;
 
 //define constants for motors
 const int motorPin[] = {
-  32,33,34,35,36,37,38,39};
+  30,31,32,33,34,35,36,37};
 const int enablePin[] = {
   2,3,4,5}; // Starts from top, going clockwise
 
 long duration;
-long distance = 15;
+long distance = 12;
 
 int dir = 1; // 0 - front, 1 - right, 2 - back, 3 - left
 int prevDir = 2;
@@ -59,16 +59,11 @@ void loop()
       start = !start;
   }
   
-<<<<<<< HEAD
   Serial.print("Start: ");
   Serial.println(start);
   
-//  if(start)
-//  {  
-=======
   if(start)
   {  
->>>>>>> parent of 25d4688... Fine tuned programs
     //Every iteration, check distance to wall
     sensor(sensorNum);
     Serial.print("Sensor Number: ");
@@ -85,14 +80,14 @@ void loop()
   
     Serial.print("Motor Direction:  ");
     Serial.println(dir);
-//  }
-//  else
-//  {
-//    digitalWrite(LEDPin1, HIGH);
-//    digitalWrite(LEDPin2, HIGH);       
-//    Serial.println("Don't do anything");
-//    delay(1000);
-//  }  
+  }
+  else
+  {
+    digitalWrite(LEDPin1, HIGH);
+    digitalWrite(LEDPin2, HIGH);       
+    Serial.println("Don't do anything");
+    delay(1000);
+  }  
 }
 
 // Function to turn off motors, before switching directions
@@ -202,8 +197,8 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
   }
   else if(motorDirection == 1 || motorDirection == 3)
   {
-    analogWrite(enablePin[2], 100); // direct front wheel
-    analogWrite(enablePin[3], 175); // direct back wheel         
+    analogWrite(enablePin[2], 135); // direct front wheel
+    analogWrite(enablePin[3], 180); // direct back wheel         
     // turn unwanted motors off (safety check)    
     digitalWrite(motorPin[0], LOW);
     digitalWrite(motorPin[1], LOW);
