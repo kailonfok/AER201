@@ -10,7 +10,7 @@ boolean start;
 const int echoPin[] = {26,22};
 const int trigPin[] = {27,23};
 const float distanceConstant = 58.2;
-const int maxRange = 20;
+const int maxRange = 10;
 
 const int motorPin[] = {30,31,32,33};
 const int enablePin[] = {2, 3};
@@ -55,15 +55,15 @@ void loop()
   {
     if(enableState) // if switched to on
     {
-      start = 1;
+      start = !start;
     }
   }
   
   Serial.print("Start: ");
   Serial.println(start);
 
-//  if(start)
-//  {  
+  if(start)
+  {  
     if (dir == 1) // first retrieve the ball
     {
       dir = closeClaw(); // change direction to forward      
@@ -82,12 +82,12 @@ void loop()
       Serial.print("The direction is: ");
       Serial.println(dir);
     }  
-//  }
-//  else
-//  {
-//    analogWrite(enablePin[0], LOW);
-//    analogWrite(enablePin[1], LOW);    
-//  }
+  }
+  else
+  {
+    analogWrite(enablePin[0], LOW);
+    analogWrite(enablePin[1], LOW);    
+  }
   
   prevEnableState = enableState;
 }
@@ -99,7 +99,6 @@ void keepDriving()
   if (distance >= maxRange)
   {   
     Serial.println("Done!");
-    start = 0;
   }
   else if (distance <= maxRange){
     movement(dir);    
@@ -109,6 +108,7 @@ void keepDriving()
 void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is left, -1 is nothing
 {
   boolean highLow = 0;
+
   analogWrite(enablePin[0], 175);
   analogWrite(enablePin[1], 175);  
 
@@ -157,7 +157,7 @@ int closeClaw()
     rightPos--;
     leftPos++;
          
-  }while(leftPos != 70 && rightPos != 110);
+  }while(leftPos != 180 && rightPos != 0);
 
   return 0; 
 }

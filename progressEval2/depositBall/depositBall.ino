@@ -5,7 +5,7 @@ Servo armServo;
 
 int leftPos = 0; // Starting positions for servo claws
 int rightPos = 180;
-int armPos = 170;
+int armPos = 165;
 boolean start;
 boolean inPosition = 0;
 
@@ -18,7 +18,7 @@ const int LEDPin1 = 52; // red LED for out of range
 const int LEDPin2 = 53; // blue LED for in range
 const float distanceConstant = 58.2;
 
-int maxRange = 60;
+int maxRange = 55;
 
 //define constants for motors
 const int motorPin[] = {
@@ -46,17 +46,6 @@ void setup()
   leftServo.attach(52);
   rightServo.attach(53);  
   
-  for(int i = 0; i < 8; i++)
-  {
-    pinMode(motorPin[i], OUTPUT);
-    if (i < 4)
-    {
-      pinMode(trigPin[i], OUTPUT);
-      pinMode(echoPin[i], INPUT);
-//      pinMode(enablePin[i], OUTPUT);
-    }  
-  }
-  
   // set servos to designated starting positions
   leftServo.write(leftPos);
   rightServo.write(rightPos);
@@ -73,38 +62,28 @@ void loop()
   enableState = digitalRead(enableButPin);
   delay(1);
   
+  Serial.print("Enable State: ");
+  Serial.println(enableState);
+  
   // on/off switch
   if(enableState != prevEnableState)
   {
     if(enableState)
       start = !start;
   }
-  
-  Serial.print("Start: ");
   Serial.println(start);
   
-//  if(start)
-//  {
+  if(start)
+  {
     if(!inPosition)
     {
-      sensor(sensorNum);
-      Serial.print("Sensor Number: ");
-      Serial.println(sensorNum);
-      
       inPosition = keepDriving();
-      
-      Serial.print("The distance is: ");  
-      Serial.println(distance);
-      
-      Serial.print("The direction is: ");
-      Serial.println(dir);
     }
     else
     {
       if(moveArm(-1))
       {
         Serial.println("First checkpoint");
-    //    temp = openClaw();
         if(armPos == 0)
         {
           if(openClaw())
@@ -118,7 +97,7 @@ void loop()
         Serial.println("Done!");
       }
     }
-//  }
+  }
 }
 
 // Function to turn off motors, before switching directions
@@ -216,8 +195,8 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
   }
   else if(motorDirection == 1 || motorDirection == 3)
   {
-    analogWrite(enablePin[2], 150); // Direct front wheel
-    analogWrite(enablePin[3], 200); // Direct back wheel         
+    analogWrite(enablePin[2], 100); // Direct front wheel
+    analogWrite(enablePin[3], 155); // Direct back wheel         
     // turn unwanted motors off (safety check)    
     digitalWrite(motorPin[0], LOW);
     digitalWrite(motorPin[1], LOW);
@@ -308,8 +287,7 @@ boolean openClaw()
     rightPos++;
     leftPos--;
       
-  }while(leftPos != 0 && rightPos != 180);
-  
+  }while(leftPos != 7 && rightPos != 208);
   return 1;
 }
 
@@ -325,7 +303,7 @@ int closeClaw()
     rightPos--;
     leftPos++;
          
-  }while(leftPos != 70 && rightPos != 110);  
+  }while(leftPos != 47 && rightPos != 98);  
 
   return 0; 
 }

@@ -1,9 +1,18 @@
+<<<<<<< HEAD
 const int echoPin[] = {22,26};
 const int trigPin[] = {23,27};
+=======
+const int echoPin[] = {24,22};
+const int trigPin[] = {25,23};
+>>>>>>> parent of 25d4688... Fine tuned programs
 const float distanceConstant = 58.2;
-const int maxRange = 10;
+const int maxRange = 5;
 
+<<<<<<< HEAD
 const int motorPin[] = {30,31,32,33};
+=======
+const int motorPin[] = {36,37,38,39};
+>>>>>>> parent of 25d4688... Fine tuned programs
 const int enablePin[] = {2, 3};
 
 long duration, distance;
