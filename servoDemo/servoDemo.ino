@@ -4,10 +4,10 @@ Servo leftServo;  // create servo object to control a servo
 // a maximum of eight servo objects can be created 
 Servo rightServo;
 
-int leftPos = 0;    // variable to store the servo position 
+int leftPos = 170;    // variable to store the servo position 
 int rightPos = 167;
 
-const int enableButPin = 40;
+const int enableButPin = 50;
 int enableState = 0;
 int prevEnableState = 0;
 boolean start;
@@ -15,11 +15,10 @@ boolean start;
 void setup() 
 { 
   Serial.begin(4800);
-  leftServo.attach(52);  // attaches the servo on pin 9 to the servo object 
-  rightServo.attach(53);
+  leftServo.attach(51);  // attaches the servo on pin 9 to the servo object 
   
-  leftServo.write(0);
-  rightServo.write(167);
+  leftServo.write(leftPos);
+
   delay(50);
   pinMode(enableButPin, INPUT);
 } 
@@ -53,9 +52,9 @@ void loop()
       delay(15);
       rightServo.write(rightPos);
       rightPos--;
-      leftPos++;
+      leftPos--;
            
-    }while(leftPos != 70 && rightPos != 97);
+    }while(leftPos != 40);
   } 
   else
   {

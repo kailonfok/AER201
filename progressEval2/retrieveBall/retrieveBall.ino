@@ -59,12 +59,11 @@ void loop()
     }
   }
   
-  
   Serial.print("Start: ");
   Serial.println(start);
 
-  if(start)
-  {  
+//  if(start)
+//  {  
     if (dir == 1) // first retrieve the ball
     {
       dir = closeClaw(); // change direction to forward      
@@ -83,12 +82,12 @@ void loop()
       Serial.print("The direction is: ");
       Serial.println(dir);
     }  
-  }
-  else
-  {
-    analogWrite(enablePin[0], LOW);
-    analogWrite(enablePin[1], LOW);    
-  }
+//  }
+//  else
+//  {
+//    analogWrite(enablePin[0], LOW);
+//    analogWrite(enablePin[1], LOW);    
+//  }
   
   prevEnableState = enableState;
 }
@@ -110,8 +109,8 @@ void keepDriving()
 void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is left, -1 is nothing
 {
   boolean highLow = 0;
-  analogWrite(enablePin[0], 255);
-  analogWrite(enablePin[1], 255);  
+  analogWrite(enablePin[0], 175);
+  analogWrite(enablePin[1], 175);  
 
   if(motorDirection == 0)
   {
@@ -155,7 +154,7 @@ int closeClaw()
     delay(15);
     rightServo.write(rightPos);
     delay(15);
-    rightPos-=1.5;
+    rightPos--;
     leftPos++;
          
   }while(leftPos != 70 && rightPos != 110);

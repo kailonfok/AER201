@@ -15,7 +15,8 @@ const int motorPin[] = {
 const int enablePin[] = {
   2,3,4,5}; // Starts from top, going clockwise
 
-long duration, distance;
+long duration;
+long distance = 15;
 
 int dir = 1; // 0 - front, 1 - right, 2 - back, 3 - left
 int prevDir = 2;
@@ -61,32 +62,32 @@ void loop()
   Serial.print("Start: ");
   Serial.println(start);
   
-  if(start)
-  {  
+//  if(start)
+//  {  
     //Every iteration, check distance to wall
     sensor(sensorNum);
     Serial.print("Sensor Number: ");
     Serial.println(sensorNum);
   
-    // function call to determine if at wall or not
-    keepDriving();    
-  
     // diagnostic outputs
     Serial.print("The distance is: ");    
-    Serial.println(distance);
+    Serial.println(distance);  
+  
+    // function call to determine if at wall or not
+    keepDriving();    
     Serial.print("Previous direction: ");
     Serial.println(prevDir);
   
     Serial.print("Motor Direction:  ");
     Serial.println(dir);
-  }
-  else
-  {
-    digitalWrite(LEDPin1, HIGH);
-    digitalWrite(LEDPin2, HIGH);       
-    Serial.println("Don't do anything");
-    delay(1000);
-  }  
+//  }
+//  else
+//  {
+//    digitalWrite(LEDPin1, HIGH);
+//    digitalWrite(LEDPin2, HIGH);       
+//    Serial.println("Don't do anything");
+//    delay(1000);
+//  }  
 }
 
 // Function to turn off motors, before switching directions

@@ -1,10 +1,10 @@
-const int echoPin[] = {24,28};
-const int trigPin[] = {25,29};
+const int echoPin[] = {22,26};
+const int trigPin[] = {23,27};
 const float distanceConstant = 58.2;
 const int maxRange = 10;
 
-const int motorPin[] = {34,35,36,37};
-const int enablePin[] = {4, 5};
+const int motorPin[] = {30,31,32,33};
+const int enablePin[] = {2, 3};
 
 long duration, distance;
 
@@ -25,8 +25,8 @@ void setup()
 //      pinMode(enablePin[i], OUTPUT);
     }
   }
-  pinMode(enablePin[0], OUTPUT);
-  pinMode(enablePin[1], OUTPUT);
+//  pinMode(enablePin[0], OUTPUT);
+//  pinMode(enablePin[1], OUTPUT);
 }
 
 void loop()
@@ -35,11 +35,11 @@ void loop()
   Serial.print("Sensor Number: ");
   Serial.println(sensorNum);
 
-  digitalWrite(enablePin[0], HIGH);
-  digitalWrite(enablePin[1], HIGH);
+//  digitalWrite(enablePin[0], HIGH);
+//  digitalWrite(enablePin[1], HIGH);
 
-//  analogWrite(enablePin[0], 153);
-//  analogWrite(enablePin[1], 165);
+  analogWrite(enablePin[0], 150);
+  analogWrite(enablePin[1], 150);
   
   Serial.print("The distance is: ");
   
@@ -110,8 +110,8 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
     Serial.println("Moving backwards");
     highLow = 0;
   }
-    digitalWrite(motorPin[0], highLow);
-    digitalWrite(motorPin[1], !highLow);
+    digitalWrite(motorPin[0], !highLow);
+    digitalWrite(motorPin[1], highLow);
     digitalWrite(motorPin[2], highLow);
     digitalWrite(motorPin[3], !highLow);
 }

@@ -16,19 +16,16 @@ void setup()
 
 void  loop()
 {
-  analogWrite(enablePin[0], 255);
-  analogWrite(enablePin[1], 255);
-
-//  digitalWrite(enablePin[0], HIGH);
-//  digitalWrite(enablePin[1], HIGH);
+  analogWrite(enablePin[0], 120);
+  analogWrite(enablePin[1], 120);
   
   digitalWrite(motorPins[0], LOW);
   digitalWrite(motorPins[1], HIGH);
   digitalWrite(motorPins[2], LOW);
   digitalWrite(motorPins[3], HIGH);  
   
-//  digitalWrite(motorPins[0], HIGH);
-//  digitalWrite(motorPins[1], LOW);
-//  digitalWrite(motorPins[2], LOW);
-//  digitalWrite(motorPins[3], HIGH);
+//  digitalWrite(motorPins[1], HIGH);
+//  digitalWrite(motorPins[0], LOW);
+//  digitalWrite(motorPins[3], LOW);
+//  digitalWrite(motorPins[2], HIGH);
 }

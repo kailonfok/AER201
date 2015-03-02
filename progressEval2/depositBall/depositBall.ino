@@ -18,7 +18,7 @@ const int LEDPin1 = 52; // red LED for out of range
 const int LEDPin2 = 53; // blue LED for in range
 const float distanceConstant = 58.2;
 
-int maxRange = 5;
+int maxRange = 60;
 
 //define constants for motors
 const int motorPin[] = {
@@ -28,9 +28,9 @@ const int enablePin[] = {
 
 long duration, distance;
 
-int dir = 1; // 0 - front, 1 - right, 2 - back, 3 - left
+int dir = 3; // 0 - front, 1 - right, 2 - back, 3 - left
 int prevDir = 2;
-int sensorNum = 1;
+int sensorNum = 3;
 boolean highLow = 0;
 
 const int enableButPin = 50;
@@ -83,8 +83,8 @@ void loop()
   Serial.print("Start: ");
   Serial.println(start);
   
-  if(start)
-  {
+//  if(start)
+//  {
     if(!inPosition)
     {
       sensor(sensorNum);
@@ -105,9 +105,12 @@ void loop()
       {
         Serial.println("First checkpoint");
     //    temp = openClaw();
-        if(openClaw())
+        if(armPos == 0)
         {
-          moveArm(1);
+          if(openClaw())
+          {
+            moveArm(1);
+          }
         }
       }
       else
@@ -115,7 +118,7 @@ void loop()
         Serial.println("Done!");
       }
     }
-  }
+//  }
 }
 
 // Function to turn off motors, before switching directions
@@ -274,7 +277,7 @@ boolean moveArm(int upDown) // -1 for up, 1 for down
     delay(15);
     armPos += upDown;
     Serial.println("Stuck??");
-    if(armPos == 40 || armPos == 170)
+    if(armPos == 0 || armPos == 170)
       exit = 0;
   }while(exit == 1);
   
@@ -302,7 +305,7 @@ boolean openClaw()
     rightServo.write(rightPos);
     delay(15);
     //increment/decrement the right and left claw positions each iteration
-    rightPos += 1.5;
+    rightPos++;
     leftPos--;
       
   }while(leftPos != 0 && rightPos != 180);
@@ -319,7 +322,7 @@ int closeClaw()
     leftServo.write(leftPos);
     delay(15);
     rightServo.write(rightPos);
-    rightPos -= 1.5;
+    rightPos--;
     leftPos++;
          
   }while(leftPos != 70 && rightPos != 110);  
