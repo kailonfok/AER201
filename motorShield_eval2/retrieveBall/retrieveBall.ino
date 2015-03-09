@@ -153,11 +153,10 @@ int closeClaw()
     leftServo.write(leftPos);
     delay(15);
     rightServo.write(rightPos);
-    delay(15);
     rightPos--;
     leftPos++;
          
-  }while(leftPos != 180 && rightPos != 0);
+  }while(leftPos != 40 && rightPos != 140);
 
   return 0; 
 }

@@ -2,20 +2,13 @@
 
 // define constants for sonar sensors
 const int echoPin[] = {
-  22,24,26,28}; // Echo Pin
+  46,48,50,52}; // Echo Pin
 const int trigPin[] = {
-  23,25,27,29}; // Trigger Pin
-const int LEDPin1 = 52; // red LED for out of range
-const int LEDPin2 = 53; // blue LED for in range
+  47,49,51,53}; // Trigger Pin
+
 const float distanceConstant = 58.2;
 
 int maxRange = 12;
-
-////define constants for motors
-//const int motorPin[] = {
-//  30,31,32,33,34,35,36,37};
-//const int enablePin[] = {
-//  2,3,4,5}; // Starts from top, going clockwise
 
 //define objects for motors
 AF_DCMotor frontMotor(1);
@@ -38,9 +31,6 @@ int prevEnableState = 0;
 void setup()
 {
   Serial.begin(9600);
-
-  pinMode(LEDPin1, OUTPUT);
-  pinMode(LEDPin2, OUTPUT);  
 
   for (int i = 0; i < 4; i++)
   {
@@ -87,9 +77,7 @@ void loop()
     keepDriving();    
   }
   else
-  {
-    digitalWrite(LEDPin1, HIGH);
-    digitalWrite(LEDPin2, HIGH);       
+  {    
     Serial.println("Don't do anything");
     delay(1000);
   }
@@ -112,10 +100,7 @@ void keepDriving()
 {
   // At designated location
   if (distance <= maxRange)
-  {
-    // Switch LED outputs
-    digitalWrite(LEDPin1, LOW);
-    digitalWrite(LEDPin2, HIGH);   
+  {  
     turnMotorsOff(); // turn motors off before making decision, so it doesn't keep driving
     
     if(dir == 1) // If going right, switch to going forward (for first hopper and first instance)
@@ -133,7 +118,7 @@ void keepDriving()
         prevDir = dir;
         dir = -1;
         sensorNum = 1;
-        maxRange = 15;
+        maxRange = 12;
     }
     else if (dir == 2)
     {
@@ -142,7 +127,7 @@ void keepDriving()
       prevDir = dir;
       dir = -1;
       sensorNum = 1; // There needs to be some logic here to then place ball and return to last hopper
-      maxRange = 15;
+      maxRange = 12;
     }
     else if (dir == -1) // stop running
     {
@@ -150,8 +135,6 @@ void keepDriving()
     }
   }
   else if (distance >= maxRange){ // Not close enough, keep driving in direction
-    digitalWrite(LEDPin1, HIGH); 
-    digitalWrite(LEDPin2, LOW);
     movement(dir);    
   }  
 }
@@ -159,37 +142,43 @@ void keepDriving()
 void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is left, -1 is nothing
 {
   // direct motors to turn in appropriate direction and speed
-  if(motorDirection == 0)
+  if (motorDirection == 0 || motorDirection == 2)
   {
-    Serial.println("Moving forward");
-    leftMotor.setSpeed(255);
+    leftMotor.setSpeed(180);
     rightMotor.setSpeed(255);
-    leftMotor.run(FORWARD);
-    rightMotor.run(FORWARD);    
+    if(motorDirection == 0)
+    {
+      Serial.println("Moving forward");
+      delay(1000);      
+      leftMotor.run(FORWARD);
+      rightMotor.run(FORWARD);
+    }
+    else
+    {
+      Serial.println("Moving back");
+      delay(1000);      
+      leftMotor.run(BACKWARD);
+      rightMotor.run(BACKWARD);
+    }
   }
-  else if (motorDirection == 1)
+  else if(motorDirection == 1 || motorDirection == 3)
   {
-    Serial.println("Moving right");
     frontMotor.setSpeed(255);
     backMotor.setSpeed(255);
-    frontMotor.run(BACKWARD);
-    backMotor.run(BACKWARD);
-  }
-  else if (motorDirection == 2)
-  {
-    Serial.println("Moving backwards");
-    leftMotor.setSpeed(255);
-    rightMotor.setSpeed(255);
-    leftMotor.run(BACKWARD);
-    rightMotor.run(BACKWARD);    
-  }
-  else if (motorDirection == 3)
-  {
-    Serial.println("Moving left");
-    frontMotor.setSpeed(255);
-    backMotor.setSpeed(255);
-    frontMotor.run(FORWARD);
-    backMotor.run(FORWARD);    
+    if(motorDirection == 1)
+    {
+      Serial.println("Moving right");
+      delay(1000);
+      frontMotor.run(BACKWARD);
+      backMotor.run(BACKWARD);
+    }
+    else
+    {
+      Serial.println("Moving left");
+      delay(1000);      
+      frontMotor.run(FORWARD);
+      backMotor.run(FORWARD);
+    }
   }
   else
   {

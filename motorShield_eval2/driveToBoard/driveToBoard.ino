@@ -1,27 +1,26 @@
+#include <AFMotor.h>
+
 // define constants for sonar sensors
 const int echoPin[] = {
   22,24,26,28}; // Echo Pin
 const int trigPin[] = {
   23,25,27,29}; // Trigger Pin
-const int LEDPin1 = 52; // red LED for out of range
-const int LEDPin2 = 53; // blue LED for in range
+
 const float distanceConstant = 58.2;
 
 int maxRange = 12;
 
-//define constants for motors
-const int motorPin[] = {
-  30,31,32,33,34,35,36,37};
-const int enablePin[] = {
-  2,3,4,5}; // Starts from top, going clockwise
+//define objects for motors
+AF_DCMotor frontMotor(1);
+AF_DCMotor leftMotor(2);
+AF_DCMotor backMotor(3);
+AF_DCMotor rightMotor(4);
 
-long duration;
-long distance = 12;
+long duration, distance;
 
 int dir = 1; // 0 - front, 1 - right, 2 - back, 3 - left
 int prevDir = 2;
 int sensorNum = 1;
-boolean highLow = 0;
 
 //enable pin to start
 boolean start;
@@ -31,19 +30,12 @@ int prevEnableState = 0;
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(9600); 
 
-  pinMode(LEDPin1, OUTPUT);
-  pinMode(LEDPin2, OUTPUT);  
-
-  for (int i = 0; i < 9; i++)
+  for (int i = 0; i < 4; i++)
   {
-    pinMode(motorPin[i], OUTPUT);
-    if (i < 4)
-    {
-      pinMode(trigPin[i], OUTPUT);
-      pinMode(echoPin[i], INPUT);
-    }
+    pinMode(trigPin[i], OUTPUT);
+    pinMode(echoPin[i], INPUT);
   }
   pinMode(enableButPin, INPUT);
 }
@@ -82,9 +74,7 @@ void loop()
     Serial.println(dir);
   }
   else
-  {
-    digitalWrite(LEDPin1, HIGH);
-    digitalWrite(LEDPin2, HIGH);       
+  {     
     Serial.println("Don't do anything");
     delay(1000);
   }  
@@ -94,15 +84,10 @@ void loop()
 void turnMotorsOff()
 {
   // Write low to all enable pins on H-bridge (0 volts)
-  analogWrite(enablePin[0], 0);
-  analogWrite(enablePin[1], 0);
-  analogWrite(enablePin[2], 0);
-  analogWrite(enablePin[3], 0);
-
-  for(int i = 0; i < 8; i++)
-  {
-    digitalWrite(motorPin[i], LOW);
-  }  
+  frontMotor.run(RELEASE);
+  leftMotor.run(RELEASE);
+  backMotor.run(RELEASE);
+  rightMotor.run(RELEASE);    
   
   Serial.println("Motors off?");
   delay(1000);
@@ -112,10 +97,7 @@ void keepDriving()
 {
   // At designated location
   if (distance <= maxRange)
-  {
-    // Switch LED outputs
-    digitalWrite(LEDPin1, LOW);
-    digitalWrite(LEDPin2, HIGH);   
+  { 
     turnMotorsOff(); // turn motors off before making decision, so it doesn't keep driving
     
     if(dir == 1) // If going right, switch to going forward (for first hopper and first instance)
@@ -144,77 +126,61 @@ void keepDriving()
       sensorNum = 1; // There needs to be some logic here to then place ball and return to last hopper
       maxRange = 12;
     }
+    else if (dir == -1) // stop running
+    {
+      turnMotorsOff();
+    }    
   }
   else if (distance >= maxRange){ // Not close enough, keep driving in direction
-    digitalWrite(LEDPin1, HIGH); 
-    digitalWrite(LEDPin2, LOW);
     movement(dir);    
   }  
 }
 
 void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is left, -1 is nothing
 {
-  // structure for designating current flow through H-bridges
-  if(motorDirection == 0)
+// direct motors to turn in appropriate direction and speed
+  if (motorDirection == 0 || motorDirection == 2)
   {
-    highLow = 1;
-    Serial.println("Moving forward");     
+    leftMotor.setSpeed(180);
+    rightMotor.setSpeed(255);
+    if(motorDirection == 0)
+    {
+      Serial.println("Moving forward");
+      delay(1000);      
+      leftMotor.run(FORWARD);
+      rightMotor.run(FORWARD);
+    }
+    else
+    {
+      Serial.println("Moving back");
+      delay(1000);      
+      leftMotor.run(BACKWARD);
+      rightMotor.run(BACKWARD);
+    }
   }
-  else if (motorDirection == 1)
+  else if(motorDirection == 1 || motorDirection == 3)
   {
-    Serial.println("Moving right");
-    highLow = 1;
-  }
-  else if (motorDirection == 2)
-  {
-    Serial.println("Moving backwards");
-    highLow = 0;
-  }
-  else if (motorDirection == 3)
-  {
-    Serial.println("Moving left");     
-    highLow = 0;
+    frontMotor.setSpeed(255);
+    backMotor.setSpeed(255);
+    if(motorDirection == 1)
+    {
+      Serial.println("Moving right");
+      delay(1000);
+      frontMotor.run(BACKWARD);
+      backMotor.run(BACKWARD);
+    }
+    else
+    {
+      Serial.println("Moving left");
+      delay(1000);      
+      frontMotor.run(FORWARD);
+      backMotor.run(FORWARD);
+    }
   }
   else
   {
     Serial.println("Don't need to move");
-  }
-
-  // Write voltages to enable pins, and direct current through H-bridge (need to modify analogWrite values)
-  if(motorDirection == 0 || motorDirection == 2)
-  {
-    analogWrite(enablePin[0], 175); // direct left wheel
-    analogWrite(enablePin[1], 175); // direct right wheel
-    digitalWrite(motorPin[0], !highLow);
-    digitalWrite(motorPin[1], highLow);
-    digitalWrite(motorPin[2], highLow);
-    digitalWrite(motorPin[3], !highLow);
-    // turn unwanted motors off (safety check)
-    digitalWrite(motorPin[4], LOW);
-    digitalWrite(motorPin[5], LOW);
-    digitalWrite(motorPin[6], LOW);
-    digitalWrite(motorPin[7], LOW);            
-  }
-  else if(motorDirection == 1 || motorDirection == 3)
-  {
-    analogWrite(enablePin[2], 135); // direct front wheel
-    analogWrite(enablePin[3], 180); // direct back wheel         
-    // turn unwanted motors off (safety check)    
-    digitalWrite(motorPin[0], LOW);
-    digitalWrite(motorPin[1], LOW);
-    digitalWrite(motorPin[2], LOW);
-    digitalWrite(motorPin[3], LOW);    
-    digitalWrite(motorPin[4], !highLow);
-    digitalWrite(motorPin[5], highLow);
-    digitalWrite(motorPin[6], !highLow);
-    digitalWrite(motorPin[7], highLow);    
-  }
-  else
-  {
-    for(int i = 0; i < 8; i++)
-    {
-      digitalWrite(motorPin[i], 0);
-    }
+    turnMotorsOff();
   }
 }
 
