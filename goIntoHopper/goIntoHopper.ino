@@ -8,8 +8,8 @@ AF_DCMotor backMotor(3);
 AF_DCMotor rightMotor(4);
 
 // Define pins for wing pins
-const int leftSwitchPin = 43;
-const int rightSwitchPin = 42;
+const int leftSwitchPin = 33;
+const int rightSwitchPin = 32;
 
 int leftSwitchVal, rightSwitchVal;
 
@@ -23,14 +23,12 @@ boolean onOff = 1;
 boolean start;
 boolean rotated = 0;
 
-const int enableButPin = 40;
 boolean enableState = 0;
 boolean prevEnableState = 0;
 
 void setup()
 {
   Serial.begin(9600);
-  pinMode(enableButPin, INPUT);
   pinMode(leftSwitchPin, INPUT);
   pinMode(rightSwitchPin, INPUT);
   
@@ -45,7 +43,7 @@ void setup()
 
 void loop()
 {
-  enableState = digitalRead(enableButPin);
+  enableState = digitalRead(rightSwitchPin);
   delay(1);
   
   if(enableState != prevEnableState) // if button is pressed and released
@@ -58,12 +56,12 @@ void loop()
   
   Serial.print("Start: ");
   Serial.println(start);
-  
-  leftSwitchVal = digitalRead(leftSwitchPin);
-  delay(1);
 
   if(start)
   {
+    leftSwitchVal = digitalRead(leftSwitchPin);
+    delay(1);    
+    
     if(!rotated)
     {
       if(!leftSwitchVal) // modify later for a state variable, to account for opposite hopper
@@ -148,14 +146,30 @@ void rotate()
   turnMotorsOff();
   rightSwitchVal = digitalRead(rightSwitchPin);
   leftMotor.setSpeed(255);
-  leftMotor.run(BACKWARD);  
+  frontMotor.setSpeed(140);
+  leftMotor.run(BACKWARD); 
+  frontMotor.run(FORWARD); 
   
   do
   {
     Serial.println("rotating");
-    delay(100);
     rightSwitchVal = digitalRead(rightSwitchPin);  
   }while(!rightSwitchVal);
+  
+  turnMotorsOff();
+  
+  rightMotor.setSpeed(255);
+  frontMotor.setSpeed(140);
+  rightMotor.run(BACKWARD);
+  frontMotor.run(BACKWARD);
+  
+  do
+  {
+    Serial.println("Aligning");
+    leftSwitchVal = digitalRead(leftSwitchPin);
+  }while(!leftSwitchVal);
+  
+  turnMotorsOff();
   
   rotated = 1;
 }

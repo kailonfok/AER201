@@ -1,4 +1,4 @@
-const int switchPin = 43;
+const int switchPin = 32;
 
 int switchVal;
 

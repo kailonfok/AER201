@@ -5,7 +5,7 @@ AF_DCMotor rightMotor(4);
 
 void setup()
 {
-  leftMotor.setSpeed(180); // change these numbers to get varying speed, max is 255
+  leftMotor.setSpeed(255); // change these numbers to get varying speed, max is 255
   rightMotor.setSpeed(255);
 
   leftMotor.run(RELEASE); // RELEASE is to brake/stop, don't change these ones

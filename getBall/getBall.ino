@@ -8,8 +8,8 @@ AF_DCMotor backMotor(3);
 AF_DCMotor rightMotor(4);
 
 // Define pins for wing pins
-const int leftSwitchPin = 43;
-const int rightSwitchPin = 42;
+const int leftSwitchPin = 33;
+const int rightSwitchPin = 32;
 
 int leftSwitchVal, rightSwitchVal;
 
@@ -33,16 +33,17 @@ boolean onOff = 1;
 boolean start;
 boolean rotated = 0;
 
-const int enableButPin = 40;
 boolean enableState = 0;
 boolean prevEnableState = 0;
 
 void setup()
 {
   Serial.begin(9600);
-  pinMode(enableButPin, INPUT);
   pinMode(leftSwitchPin, INPUT);
   pinMode(rightSwitchPin, INPUT);
+  
+  leftServo.attach(41); 
+  rightServo.attach(40);  
   
   for (int i = 0; i < 2; i++)
   {
@@ -61,7 +62,7 @@ void setup()
 
 void loop()
 {
-  enableState = digitalRead(enableButPin);
+  enableState = digitalRead(rightSwitchPin);
   delay(1);
   
   if(enableState != prevEnableState) // if button is pressed and released
@@ -145,7 +146,7 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
   // direct motors to turn in appropriate direction and speed
   if (motorDirection == 0 || motorDirection == 2)
   {
-    leftMotor.setSpeed(180);
+    leftMotor.setSpeed(220);
     rightMotor.setSpeed(255);
     if(motorDirection == 0)
     {
@@ -193,14 +194,30 @@ void rotate()
   turnMotorsOff();
   rightSwitchVal = digitalRead(rightSwitchPin);
   leftMotor.setSpeed(255);
-  leftMotor.run(BACKWARD);  
+  frontMotor.setSpeed(140);
+  leftMotor.run(BACKWARD); 
+  frontMotor.run(FORWARD); 
   
   do
   {
     Serial.println("rotating");
-    delay(100);
     rightSwitchVal = digitalRead(rightSwitchPin);  
   }while(!rightSwitchVal);
+  
+  turnMotorsOff();
+  
+  rightMotor.setSpeed(255);
+  frontMotor.setSpeed(140);
+  rightMotor.run(BACKWARD);
+  frontMotor.run(BACKWARD);
+  
+  do
+  {
+    Serial.println("Aligning");
+    leftSwitchVal = digitalRead(leftSwitchPin);
+  }while(!leftSwitchVal);
+  
+  turnMotorsOff();
   
   rotated = 1;
 }
@@ -228,12 +245,13 @@ int closeClaw()
   do // loop to close the claws (left and right claws go 180 degrees)
   {
     leftServo.write(leftPos);
-    delay(15);
+    delay(15);        
     rightServo.write(rightPos);
+    
     rightPos--;
     leftPos++;
          
-  }while(leftPos != 40 && rightPos != 140);
+  }while(leftPos != 110 && rightPos != 70);
 
   return 0; 
 }
