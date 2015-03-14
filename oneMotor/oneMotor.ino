@@ -14,6 +14,6 @@ void setup()
 
 void  loop()
 {
-  leftMotor.run(BACKWARD); // change these to change from forward/back, left/right
+  leftMotor.run(2); // change these to change from forward/back, left/right
   rightMotor.run(BACKWARD);
 }

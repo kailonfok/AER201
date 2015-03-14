@@ -8,27 +8,28 @@ AF_DCMotor backMotor(3);
 AF_DCMotor rightMotor(4);
 
 // Define pins for wing pins
-const int leftSwitchPin = 33;
-const int rightSwitchPin = 32;
+const byte leftSwitchPin = 33;
+const byte rightSwitchPin = 32;
 
 int leftSwitchVal, rightSwitchVal;
 
-const int echoPin[] = {26,22};
-const int trigPin[] = {27,23};
+const byte echoPin[] = {46,48,50,52};
+const byte trigPin[] = {47,49,51,53};
 const float distanceConstant = 58.2;
-const int maxRange = 10;
+const byte maxRange = 12;
 
 long duration, distance;
+long wallDistance;
 
-int dir = 1;
-int sensorNum = 0;
+byte dir = 1;
+byte sensorNum = 0;
 
 // Define servo objects
 Servo leftServo;
 Servo rightServo;
 
-int leftPos = 0; // Starting positions for servo claws
-int rightPos = 180;
+byte leftPos = 0; // Starting positions for servo claws
+byte rightPos = 180;
 boolean onOff = 1;
 boolean start;
 boolean rotated = 0;
@@ -89,7 +90,9 @@ void loop()
       }
       else
       {
-        rotate();
+        sensor(1);
+        wallDistance = distance; // check distance to wall - to be able to turn back
+        rotateIn();
       }
     }
     else
@@ -97,20 +100,21 @@ void loop()
       if (dir == 1) // first retrieve the ball
       {
         dir = closeClaw(); // change direction to forward      
+        rotateOut();        
       }
       else
-      {
+      { 
+        //Every iteration, check distance to wall
         sensor(sensorNum);
         Serial.print("Sensor Number: ");
         Serial.println(sensorNum);
-        
+      
+        // diagnostic outputs
+        Serial.print("The distance is: ");    
+        Serial.println(distance);  
+      
+        // function call to determine if at wall or not
         keepDriving();
-        
-        Serial.print("The distance is: ");  
-        Serial.println(distance);
-        
-        Serial.print("The direction is: ");
-        Serial.println(dir);
       }  
     }
   }  
@@ -143,44 +147,47 @@ void keepDriving()
 
 void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is left, -1 is nothing
 {
+  byte oneTwo = 0;
+  
   // direct motors to turn in appropriate direction and speed
+  if(motorDirection == 0)
+  {
+    oneTwo = 1;
+    Serial.println("Moving forwards");
+    delay(1000);
+  }
+  else if(motorDirection == 1)
+  {
+    oneTwo = 2;
+    Serial.println("Moving right");
+    delay(1000);    
+  }
+  else if(motorDirection == 2)
+  {
+    oneTwo = 2;
+    Serial.println("Moving backwards");
+    delay(1000);    
+  }
+  else
+  {
+    oneTwo = 1;
+    Serial.println("Moving left");
+    delay(1000);    
+  }
+  
   if (motorDirection == 0 || motorDirection == 2)
   {
-    leftMotor.setSpeed(220);
+    leftMotor.setSpeed(255);
     rightMotor.setSpeed(255);
-    if(motorDirection == 0)
-    {
-      Serial.println("Moving forward");
-      delay(1000);      
-      leftMotor.run(FORWARD);
-      rightMotor.run(FORWARD);
-    }
-    else
-    {
-      Serial.println("Moving back");
-      delay(1000);      
-      leftMotor.run(BACKWARD);
-      rightMotor.run(BACKWARD);
-    }
+    leftMotor.run(oneTwo);
+    rightMotor.run(oneTwo);
   }
   else if(motorDirection == 1 || motorDirection == 3)
   {
-    frontMotor.setSpeed(255);
+    frontMotor.setSpeed(100);
     backMotor.setSpeed(255);
-    if(motorDirection == 1)
-    {
-      Serial.println("Moving right");
-      delay(1000);
-      frontMotor.run(BACKWARD);
-      backMotor.run(BACKWARD);
-    }
-    else
-    {
-      Serial.println("Moving left");
-      delay(1000);      
-      frontMotor.run(FORWARD);
-      backMotor.run(FORWARD);
-    }
+    frontMotor.run(oneTwo);
+    backMotor.run(oneTwo);
   }
   else
   {
@@ -189,7 +196,9 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
   }
 }
 
-void rotate()
+
+
+void rotateIn()
 {
   turnMotorsOff();
   rightSwitchVal = digitalRead(rightSwitchPin);
@@ -220,6 +229,40 @@ void rotate()
   turnMotorsOff();
   
   rotated = 1;
+}
+
+void rotateOut()
+{
+  int currentTime = millis();
+  int previousTime = currentTime;
+  
+  leftMotor.setSpeed(255);
+  frontMotor.setSpeed(180);
+  leftMotor.run(FORWARD);
+  frontMotor.run(BACKWARD); 
+  
+  do
+  {
+    Serial.println("rotating out");
+    currentTime = millis();
+    
+  }while(currentTime - previousTime <= 2000);
+  previousTime = currentTime;  
+  
+  turnMotorsOff();
+  
+  leftMotor.setSpeed(255);
+  backMotor.setSpeed(140);
+  leftMotor.run(BACKWARD);
+  backMotor.run(FORWARD);
+  
+  do
+  {
+    Serial.println("Back to wall");
+    currentTime = millis();
+  }while(currentTime - previousTime <= 2000);
+  
+  turnMotorsOff();  
 }
 
 void sensor(int sensorNum)

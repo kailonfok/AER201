@@ -1,5 +1,12 @@
-#include <Servo.h>
 #include <AFMotor.h>
+#include <Servo.h>
+
+//define objects for motors
+AF_DCMotor frontMotor(1);
+AF_DCMotor leftMotor(2);
+AF_DCMotor backMotor(3);
+AF_DCMotor rightMotor(4);
+
 Servo leftServo;
 Servo rightServo;
 Servo armServo;
@@ -10,31 +17,26 @@ int armPos = 165;
 boolean start;
 boolean inPosition = 0;
 
+// Define pins for wing pins
+const int leftSwitchPin = 33;
+const int rightSwitchPin = 32;
+
 // define constants for sonar sensors
 const int echoPin[] = {
-  46,48,50,52}; // Echo Pin
+  22,24,26,28}; // Echo Pin
 const int trigPin[] = {
-  48,49,51,53}; // Trigger Pin
-const int LEDPin1 = 52; // red LED for out of range
-const int LEDPin2 = 53; // blue LED for in range
+  23,25,27,29}; // Trigger Pin
+
 const float distanceConstant = 58.2;
 
-int maxRange = 10;
-
-//define objects for motors
-AF_DCMotor frontMotor(1);
-AF_DCMotor leftMotor(2);
-AF_DCMotor backMotor(3);
-AF_DCMotor rightMotor(4);
+int maxRange = 55;
 
 long duration, distance;
 
 int dir = 3; // 0 - front, 1 - right, 2 - back, 3 - left
 int prevDir = 2;
 int sensorNum = 3;
-boolean highLow = 0;
 
-const int enableButPin = 32;
 int enableState = 0;
 int prevEnableState = 0;
 
@@ -43,9 +45,9 @@ void setup()
   Serial.begin(9600);
   
   // attach servo objects to respective pins
-  armServo.attach(42);
-  leftServo.attach(41);
-  rightServo.attach(40);  
+  armServo.attach(51);
+  leftServo.attach(52);
+  rightServo.attach(53);  
   
   // set servos to designated starting positions
   leftServo.write(leftPos);
@@ -53,20 +55,19 @@ void setup()
   armServo.write(armPos);
   delay(50);
   
-  for(int i = 0; i < 4; i++)
-  {
-    pinMode(echoPin[i], INPUT);
-    pinMode(trigPin[i], OUTPUT);
-  }
-  
   closeClaw();
   
-  pinMode(enableButPin, INPUT);
+  pinMode(rightSwitchPin, INPUT);
+  
+  frontMotor.run(RELEASE);
+  leftMotor.run(RELEASE);
+  backMotor.run(RELEASE);
+  rightMotor.run(RELEASE);    
 }
 
 void loop()
 {
-  enableState = digitalRead(enableButPin);
+  enableState = digitalRead(rightSwitchPin);
   delay(1);
   
   Serial.print("Enable State: ");
@@ -84,10 +85,6 @@ void loop()
   {
     if(!inPosition)
     {
-      sensor(3);
-      Serial.print("The distance is: ");
-      Serial.print(distance);
-      
       inPosition = keepDriving();
     }
     else
@@ -128,10 +125,7 @@ boolean keepDriving()
 {
   // At designated location
   if (distance <= maxRange)
-  {
-    // Switch LED outputs
-    digitalWrite(LEDPin1, LOW);
-    digitalWrite(LEDPin2, HIGH);   
+  { 
     turnMotorsOff(); // turn motors off before making decision, so it doesn't keep driving
     
     if(dir == 1) // If going right, switch to going forward (for first hopper and first instance)
@@ -159,7 +153,7 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
   // direct motors to turn in appropriate direction and speed
   if (motorDirection == 0 || motorDirection == 2)
   {
-    leftMotor.setSpeed(255);
+    leftMotor.setSpeed(220);
     rightMotor.setSpeed(255);
     if(motorDirection == 0)
     {
@@ -178,7 +172,7 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
   }
   else if(motorDirection == 1 || motorDirection == 3)
   {
-    frontMotor.setSpeed(100);
+    frontMotor.setSpeed(255);
     backMotor.setSpeed(255);
     if(motorDirection == 1)
     {
@@ -280,16 +274,16 @@ boolean openClaw()
 int closeClaw()
 {
   Serial.println("Closing claw");
-  
   do // loop to close the claws (left and right claws go 180 degrees)
   {
     leftServo.write(leftPos);
-    delay(15);
+    delay(15);        
     rightServo.write(rightPos);
+    
     rightPos--;
     leftPos++;
          
-  }while(leftPos != 110 && rightPos != 70);  
+  }while(leftPos != 110 && rightPos != 70);
 
   return 0; 
 }
