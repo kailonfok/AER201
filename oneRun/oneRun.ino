@@ -121,6 +121,17 @@ void loop()
           Serial.println(distance);           
           // function call to determine if at wall or not
           keepDriving(switchKeepDriving);
+         
+          sensor(0);
+ 
+          /*
+            THIS NEEDS TO BE TESTED!!!!!!!!!!!
+          */
+          if(distance >= maxRange)
+          {
+            switchKeepDriving = 1;
+            keepDriving(switchKeepDriving);
+          }         
         }
         else
         {
