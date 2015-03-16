@@ -1,11 +1,11 @@
 #include <AFMotor.h>
 
-AF_DCMotor leftMotor(2); // change the numbers here to "connect" to different motors (labeled on the motor shield)
-AF_DCMotor rightMotor(4);
+AF_DCMotor leftMotor(1); // change the numbers here to "connect" to different motors (labeled on the motor shield)
+AF_DCMotor rightMotor(3);
 
 void setup()
 {
-  leftMotor.setSpeed(255); // change these numbers to get varying speed, max is 255
+  leftMotor.setSpeed(65); // change these numbers to get varying speed, max is 255
   rightMotor.setSpeed(255);
 
   leftMotor.run(RELEASE); // RELEASE is to brake/stop, don't change these ones
@@ -14,6 +14,6 @@ void setup()
 
 void  loop()
 {
-  leftMotor.run(2); // change these to change from forward/back, left/right
-  rightMotor.run(BACKWARD);
+  leftMotor.run(FORWARD); // change these to change from forward/back, left/right
+  rightMotor.run(FORWARD);
 }

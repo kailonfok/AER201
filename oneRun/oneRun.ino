@@ -16,7 +16,7 @@ int leftSwitchVal, rightSwitchVal;
 const byte echoPin[] = {46,48,50,52};
 const byte trigPin[] = {47,49,51,53};
 const float distanceConstant = 58.2;
-byte maxRange = 12;
+byte maxRange = 27;
 
 long duration, distance;
 long wallDistance;
@@ -31,7 +31,7 @@ Servo armServo;
 
 byte leftPos = 0; // Starting positions for servo claws
 byte rightPos = 180;
-byte armPos = 165;
+byte armPos = 180;
 boolean onOff = 1;
 boolean start;
 boolean rotated = 0;
@@ -39,6 +39,8 @@ boolean inPosition = 0;
 
 boolean enableState = 0;
 boolean prevEnableState = 0;
+
+byte switchKeepDriving = 1;
 
 void setup()
 {
@@ -118,13 +120,14 @@ void loop()
           Serial.print("The distance is: ");    
           Serial.println(distance);           
           // function call to determine if at wall or not
-          keepDriving();
+          keepDriving(switchKeepDriving);
         }
         else
         {
           if(moveArm(-1))
           {
             Serial.println("First checkpoint");
+            delay(1000);
             if(armPos == 0)
             {
               if(openClaw())
@@ -152,25 +155,50 @@ void turnMotorsOff()
   delay(1000);
 }
 
-void keepDriving()
+void keepDriving(byte lessGreater)
 {
-  if (distance <= maxRange)
-  {   
-    turnMotorsOff();    
-    if(dir == 0)
-    {
-      dir = 3;
-      maxRange = 5;
-      sensorNum = 3;
+  if (lessGreater == 1)
+  {
+    if (distance <= maxRange)
+    {   
+      turnMotorsOff();    
+      if(dir == 0)
+      {
+        dir = 3;
+        maxRange = 55;
+        sensorNum = 1;
+        switchKeepDriving = 0;
+      }
+      else if(dir == 3)
+      {
+        dir = -1;
+        inPosition = 1;
+      }
     }
-    else if(dir == 3)
-    {
-      dir = -1;
-      inPosition = 1;
+    else if (distance >= maxRange){
+      movement(dir);    
     }
   }
-  else if (distance >= maxRange){
-    movement(dir);    
+  else
+  {
+    if (distance >= maxRange)
+    {       
+      turnMotorsOff();    
+      if(dir == 0)
+      {
+        dir = 3;
+        maxRange = 55;
+        sensorNum = 1;
+      }
+      else if(dir == 3)
+      {
+        dir = -1;
+        inPosition = 1;
+      }
+    }
+    else if (distance <= maxRange){
+      movement(dir);    
+    }  
   }
 }
 
@@ -194,7 +222,7 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
   else if(motorDirection == 2)
   {
     oneTwo = 2;
-    Serial.println("Moving backwards");
+    Serial.println("Moving backwards");  
     delay(1000);    
   }
   else
@@ -206,14 +234,14 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
   
   if (motorDirection == 0 || motorDirection == 2)
   {
-    leftMotor.setSpeed(255);
-    rightMotor.setSpeed(255);
+    leftMotor.setSpeed(240);
+    rightMotor.setSpeed(240);
     leftMotor.run(oneTwo);
     rightMotor.run(oneTwo);
   }
   else if(motorDirection == 1 || motorDirection == 3)
   {
-    frontMotor.setSpeed(140);
+    frontMotor.setSpeed(80);
     backMotor.setSpeed(255);
     frontMotor.run(oneTwo);
     backMotor.run(oneTwo);
@@ -230,7 +258,7 @@ void rotateIn()
   turnMotorsOff();
   rightSwitchVal = digitalRead(rightSwitchPin);
   rightMotor.setSpeed(255);
-  frontMotor.setSpeed(140);
+  frontMotor.setSpeed(175);
   rightMotor.run(BACKWARD); 
   frontMotor.run(BACKWARD); 
   
@@ -243,7 +271,7 @@ void rotateIn()
   turnMotorsOff();
   
   leftMotor.setSpeed(255);
-  frontMotor.setSpeed(140);
+  frontMotor.setSpeed(175);
   leftMotor.run(BACKWARD);
   frontMotor.run(FORWARD);
   
@@ -264,7 +292,7 @@ void rotateOut()
   int previousTime = currentTime;
   
   leftMotor.setSpeed(255);
-  frontMotor.setSpeed(180);
+  frontMotor.setSpeed(150);
   leftMotor.run(FORWARD);
   frontMotor.run(BACKWARD); 
   
@@ -278,7 +306,7 @@ void rotateOut()
   
   turnMotorsOff();
   
-  leftMotor.setSpeed(255);
+  leftMotor.setSpeed(150);
   backMotor.setSpeed(200);
   leftMotor.run(BACKWARD);
   backMotor.run(BACKWARD);
@@ -330,7 +358,7 @@ boolean moveArm(int upDown) // -1 for up, 1 for down
     delay(15);
     armPos += upDown;
     Serial.println("Stuck??");
-    if(armPos == 0 || armPos == 165)
+    if(armPos == 0 || armPos == 172)
       exit = 0;
   }while(exit == 1);
   
@@ -377,7 +405,7 @@ int closeClaw()
     rightPos--;
     leftPos++;
          
-  }while(leftPos != 110 && rightPos != 70);  
+  }while(leftPos != 120 && rightPos != 60);  
 
   return 0; 
 }

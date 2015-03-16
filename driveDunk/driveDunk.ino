@@ -13,7 +13,7 @@ Servo armServo;
 
 int leftPos = 0; // Starting positions for servo claws
 int rightPos = 180;
-int armPos = 165;
+int armPos = 175;
 boolean start;
 boolean inPosition = 0;
 

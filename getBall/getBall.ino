@@ -177,15 +177,15 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
   
   if (motorDirection == 0 || motorDirection == 2)
   {
-    leftMotor.setSpeed(255);
-    rightMotor.setSpeed(255);
+    leftMotor.setSpeed(150);
+    rightMotor.setSpeed(150);
     leftMotor.run(oneTwo);
     rightMotor.run(oneTwo);
   }
   else if(motorDirection == 1 || motorDirection == 3)
   {
-    frontMotor.setSpeed(100);
-    backMotor.setSpeed(255);
+    frontMotor.setSpeed(70);
+    backMotor.setSpeed(200);
     frontMotor.run(oneTwo);
     backMotor.run(oneTwo);
   }

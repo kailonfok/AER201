@@ -6,7 +6,7 @@ Servo armServo;
 
 int leftPos = 0; // Starting positions for servo claws
 int rightPos = 180;
-int armPos = 165;
+int armPos = 180;
 boolean start;
 boolean inPosition = 0;
 
@@ -97,6 +97,7 @@ void loop()
         Serial.println("First checkpoint");
         if(armPos == 0)
         {
+          delay(1000);
           if(openClaw())
           {
             moveArm(1);
@@ -239,10 +240,10 @@ boolean moveArm(int upDown) // -1 for up, 1 for down
   do
   {
     armServo.write(armPos);
-    delay(15);
+    delay(5);
     armPos += upDown;
     Serial.println("Stuck??");
-    if(armPos == 0 || armPos == 170)
+    if(armPos == 0 || armPos == 178)
       exit = 0;
   }while(exit == 1);
   
