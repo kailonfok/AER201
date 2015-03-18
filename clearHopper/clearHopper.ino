@@ -42,7 +42,7 @@ boolean prevEnableState = 0;
 
 byte switchKeepDriving = 1;
 
-byte numBallsLeft = 4;
+int numBallsLeft = 4;
 
 void setup()
 {
@@ -86,9 +86,6 @@ void loop()
   Serial.print("Start: ");
   Serial.println(start);
   
-  rightSwitchVal = digitalRead(rightSwitchPin);
-  delay(1);
-  
   if(numBallsLeft == 0)
   {
     start = 0;
@@ -98,6 +95,9 @@ void loop()
   {
     if(!rotated)
     {
+      rightSwitchVal = digitalRead(rightSwitchPin);
+      delay(1);      
+      
       if(numBallsLeft == 4)
       {
         if(!rightSwitchVal) // modify later for a state variable, to account for opposite hopper
@@ -106,11 +106,13 @@ void loop()
         }
         else
         {
-          rotateIn(numBallsLeft);
+          rotateIn();
         }
       }
       else
       {
+        leftSwitchVal = digitalRead(leftSwitchPin);
+        delay(1);        
         if(!leftSwitchVal) // modify later for a state variable, to account for opposite hopper
         {
           //Every iteration, check distance to wall
@@ -126,7 +128,7 @@ void loop()
         }
         else
         {
-          rotateIn(numBallsLeft);
+          rotateIn();
         }        
       }
     }
@@ -151,21 +153,7 @@ void loop()
           Serial.print("The distance is: ");    
           Serial.println(distance);           
           // function call to determine if at wall or not
-          keepDriving(switchKeepDriving);
-         
-          sensor(0);
- 
-          /*
-            THIS NEEDS TO BE TESTED!!!!!!!!!!!
-          */
-          if(distance >= 17)
-          {
-            maxRange = 17;
-            switchKeepDriving = 1;
-            dir = 0;
-            sensorNum = 0;
-            keepDriving(switchKeepDriving);
-          }         
+          keepDriving(switchKeepDriving);         
         }
         else
         {
@@ -178,6 +166,9 @@ void loop()
               if(openClaw())
               {
                 moveArm(1);
+                Serial.print("Num balls left: ");
+                Serial.println(numBallsLeft);
+                delay(1000);
               }
             }
           }          
@@ -210,25 +201,29 @@ void keepDriving(byte lessGreater)
   if (lessGreater == 1)
   {
     if (distance <= maxRange)
-    {   
-      turnMotorsOff();    
-      if(dir == 0)
-      {
-        dir = 3;
-        maxRange = 55;
-        sensorNum = 1;
-        switchKeepDriving = 0;
-      }
-      else if(dir == 3)
-      {
-        dir = 1;
-        sensorNum = 1;
-        inPosition = 1;
-      }
-      else if(dir == 1)
-      {
-        dir = 2;
-        sensorNum = 2;
+    { 
+      sensor(2);
+      if(distance >= 120)
+      {  
+        turnMotorsOff();    
+        if(dir == 0)
+        {
+          dir = 3;
+          maxRange = 55;
+          sensorNum = 1;
+          switchKeepDriving = 0;
+        }
+        else if(dir == 3)
+        {
+          dir = 1;
+          sensorNum = 1;
+          inPosition = 1;
+        }
+        else if(dir == 1)
+        {
+          dir = 2;
+          sensorNum = 2;
+        }
       }
     }
     else if (distance >= maxRange){
@@ -292,8 +287,8 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
   
   if (motorDirection == 0 || motorDirection == 2)
   {
-    leftMotor.setSpeed(240);
-    rightMotor.setSpeed(240);
+    leftMotor.setSpeed(245);
+    rightMotor.setSpeed(245);
     leftMotor.run(oneTwo);
     rightMotor.run(oneTwo);
   }
@@ -311,10 +306,11 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
   }
 }
 
-void rotateIn(byte index)
+void rotateIn()
 {
   turnMotorsOff();
-  if(index == 4)
+  
+  if(numBallsLeft == 4)
   {
     rightSwitchVal = digitalRead(rightSwitchPin);
     rightMotor.setSpeed(255);
@@ -347,7 +343,7 @@ void rotateIn(byte index)
     leftMotor.setSpeed(255);
     frontMotor.setSpeed(175);
     leftMotor.run(BACKWARD); 
-    frontMotor.run(BACKWARD); 
+    frontMotor.run(FORWARD); 
     
     do
     {
@@ -360,7 +356,7 @@ void rotateIn(byte index)
     rightMotor.setSpeed(255);
     frontMotor.setSpeed(175);
     rightMotor.run(BACKWARD);
-    frontMotor.run(FORWARD);
+    frontMotor.run(BACKWARD);
     
     do
     {
