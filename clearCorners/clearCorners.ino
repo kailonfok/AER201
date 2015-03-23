@@ -16,10 +16,9 @@ int leftSwitchVal, rightSwitchVal;
 const byte echoPin[] = {46,48,50,52};
 const byte trigPin[] = {47,49,51,53};
 const float distanceConstant = 58.2;
-byte maxRange = 15;
+byte maxRange = 30;
 
-long duration, distance;
-long prevDistance;
+long duration, distance,prevDistance;
 long wallDistance;
 
 byte dir = 2;
@@ -33,6 +32,7 @@ Servo armServo;
 byte leftPos = 0; // Starting positions for servo claws
 byte rightPos = 180;
 byte armPos = 180;
+boolean onOff = 1;
 boolean start;
 boolean rotated = 0;
 boolean inPosition = 0;
@@ -41,6 +41,9 @@ boolean enableState = 0;
 boolean prevEnableState = 0;
 
 byte switchKeepDriving = 1;
+
+byte numBallsLeft[2] = {4,4};
+byte index = 0;
 
 void setup()
 {
@@ -84,20 +87,53 @@ void loop()
   Serial.print("Start: ");
   Serial.println(start);
   
-  rightSwitchVal = digitalRead(rightSwitchPin);
-  delay(1);
+  if(numBallsLeft[1] == 0)
+  {
+    start = 0;
+  }
 
   if(start)
   {
     if(!rotated)
     {
-      if(!rightSwitchVal) // modify later for a state variable, to account for opposite hopper
+      rightSwitchVal = digitalRead(rightSwitchPin);
+      delay(1);    
+      
+      if(numBallsLeft[0] == 4) // only for very initial retrieval
       {
-        movement(dir);
+        if(!rightSwitchVal)
+        {
+          movement(dir);
+        }
+        else
+        {
+          rotateIn();
+        }
       }
       else
       {
-        rotateIn();
+        leftSwitchVal = digitalRead(leftSwitchPin);
+        delay(1);
+        rightSwitchVal = digitalRead(rightSwitchPin);
+        delay(1);
+        
+        if(!leftSwitchVal || !rightSwitchVal) // modify later for a state variable, to account for opposite hopper
+        {
+          //Every iteration, check distance to wall
+          sensor(sensorNum);
+          Serial.print("Sensor Number: ");
+          Serial.println(sensorNum);
+        
+          // diagnostic outputs
+          Serial.print("The distance is: ");    
+          Serial.println(distance);           
+          // function call to determine if at wall or not
+          keepDriving(switchKeepDriving);          
+        }
+        else
+        {
+          rotateIn();
+        }        
       }
     }
     else
@@ -105,12 +141,21 @@ void loop()
       if (dir == 2) // first retrieve the ball
       {
         dir = closeClaw(); // change direction to forward      
-        rotateOut();        
+        if (index == 0)
+          rotateOutRight();
+        else
+          rotateOutLeft();       
       }
       else
       {      
         if (!inPosition)
         {
+          /*
+            THIS WILL BE MODIFIED TO ACCOUNT FOR A FORCE SENSOR
+            DRIVE TILL FORCE SENSOR HIT
+            REVERSE
+            GO LEFT OR RIGHT
+          */
           //Every iteration, check distance to wall
           sensor(sensorNum);
           Serial.print("Sensor Number: ");
@@ -124,21 +169,31 @@ void loop()
         }
         else
         {
+          movement(0);
+          delay(2000);
+          turnMotorsOff();
           if(moveArm(-1))
           {
-            Serial.println("First checkpoint");
             delay(1000);
             if(armPos == 0)
             {
               if(openClaw())
               {
                 moveArm(1);
+                Serial.print("Num balls left: ");
+                Serial.println(numBallsLeft);
+                delay(1000);
               }
             }
           }          
         }
       }  
     }
+  }
+  else
+  {
+    Serial.println("Cleared hopper");
+    delay(1000);
   }  
 }
 
@@ -168,25 +223,28 @@ void keepDriving(byte lessGreater)
         turnMotorsOff();    
         if(dir == 0)
         {
-          sensor(0);
-          if(distance > maxRange)
+          if(index == 0)
           {
-            movement(0);
-            do
-            {
-              sensor(0);
-            }while(distance >= maxRange);
+            dir = 3;
+            sensorNum = 1;
           }
-          turnMotorsOff();
-          dir = 3;
-          maxRange = 55;
-          sensorNum = 1;
+          else
+          {
+            dir = 1;
+            sensorNum = 3;
+          }
+          maxRange = 55;          
           switchKeepDriving = 0;
+        }
+        else if(dir == 1)
+        {
+          sensorNum = 0;
+          dir = 2;
         }
         else if(dir == 3)
         {
-          dir = -1;
-          inPosition = 1;
+          sensorNum = 0;
+          dir = 2;
         }
       }
       else if (distance >= maxRange){
@@ -200,9 +258,16 @@ void keepDriving(byte lessGreater)
     {       
       turnMotorsOff();    
       if(dir == 3)
-      {   
-        dir = -1;
+      {
+        dir = 1;
         inPosition = 1;
+        maxRange = 5;
+      }
+      else if(dir == 1)
+      {
+        dir = 3;
+        inPosition = 1;
+        maxRange = 5;
       }
     }
     else if (distance <= maxRange){
@@ -265,37 +330,67 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
 void rotateIn()
 {
   turnMotorsOff();
-  rightSwitchVal = digitalRead(rightSwitchPin);
-  rightMotor.setSpeed(255);
-  frontMotor.setSpeed(175);
-  rightMotor.run(BACKWARD); 
-  frontMotor.run(BACKWARD); 
   
-  do
+  if(numBallsLeft[0] == 4)
   {
-    Serial.println("rotating");
-    leftSwitchVal = digitalRead(leftSwitchPin);  
-  }while(!leftSwitchVal);
-  
-  turnMotorsOff();
-  
-  leftMotor.setSpeed(255);
-  frontMotor.setSpeed(175);
-  leftMotor.run(BACKWARD);
-  frontMotor.run(FORWARD);
-  
-  do
-  {
-    Serial.println("Aligning");
     rightSwitchVal = digitalRead(rightSwitchPin);
-  }while(!rightSwitchVal);
-  
+    rightMotor.setSpeed(255);
+    frontMotor.setSpeed(175);
+    rightMotor.run(BACKWARD); 
+    frontMotor.run(BACKWARD); 
+    
+    do
+    {
+      Serial.println("rotating");
+      leftSwitchVal = digitalRead(leftSwitchPin);  
+    }while(!leftSwitchVal);
+    
+    turnMotorsOff();
+    
+    leftMotor.setSpeed(255);
+    frontMotor.setSpeed(175);
+    leftMotor.run(BACKWARD);
+    frontMotor.run(FORWARD);
+    
+    do
+    {
+      Serial.println("Aligning");
+      rightSwitchVal = digitalRead(rightSwitchPin);
+    }while(!rightSwitchVal);
+  }
+  else
+  {
+    leftSwitchVal = digitalRead(leftSwitchPin);
+    leftMotor.setSpeed(255);
+    frontMotor.setSpeed(175);
+    leftMotor.run(BACKWARD); 
+    frontMotor.run(FORWARD); 
+    
+    do
+    {
+      Serial.println("rotating");
+      rightSwitchVal = digitalRead(rightSwitchPin);  
+    }while(!rightSwitchVal);
+    
+    turnMotorsOff();
+    
+    rightMotor.setSpeed(255);
+    frontMotor.setSpeed(175);
+    rightMotor.run(BACKWARD);
+    frontMotor.run(BACKWARD);
+    
+    do
+    {
+      Serial.println("Aligning");
+      leftSwitchVal = digitalRead(leftSwitchPin);
+    }while(!leftSwitchVal);    
+  }
   turnMotorsOff();
   
   rotated = 1;
 }
 
-void rotateOut()
+void rotateOutRight()
 {
   int currentTime = millis();
   int previousTime = currentTime;
@@ -318,6 +413,39 @@ void rotateOut()
   backMotor.setSpeed(200);
   leftMotor.run(BACKWARD);
   backMotor.run(BACKWARD);
+  
+  do
+  {
+    Serial.println("Back to wall");
+    currentTime = millis();
+  }while(currentTime - previousTime <= 2000);
+  
+  turnMotorsOff();  
+}
+
+void rotateOutLeft()
+{
+  int currentTime = millis();
+  int previousTime = currentTime;
+  
+  rightMotor.setSpeed(255);
+  frontMotor.setSpeed(150);
+  rightMotor.run(FORWARD);
+  frontMotor.run(FORWARD); 
+  
+  do
+  {
+    Serial.println("rotating out");
+    currentTime = millis();
+  }while(currentTime - previousTime <= 2000);
+  previousTime = currentTime;  
+  
+  turnMotorsOff();
+  
+  rightMotor.setSpeed(150);
+  backMotor.setSpeed(200);
+  rightMotor.run(BACKWARD);
+  backMotor.run(FORWARD);
   
   do
   {
@@ -366,7 +494,7 @@ boolean moveArm(int upDown) // -1 for up, 1 for down
     delay(15);
     armPos += upDown;
     Serial.println("Stuck??");
-    if(armPos == 0 || armPos == 172)
+    if(armPos == 0 || armPos == 179)
       exit = 0;
   }while(exit == 1);
   
@@ -379,7 +507,14 @@ boolean moveArm(int upDown) // -1 for up, 1 for down
   else
   {
     value = 0;
-    start = 0;
+    inPosition = 0;
+    rotated = 0;
+    numBallsLeft[index]--;
+    if(numBallsLeft[index] == 0);
+    {
+      index++;
+    }
+    switchKeepDriving = 1;
   }
     
   return value;   

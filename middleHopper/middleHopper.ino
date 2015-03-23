@@ -16,10 +16,9 @@ int leftSwitchVal, rightSwitchVal;
 const byte echoPin[] = {46,48,50,52};
 const byte trigPin[] = {47,49,51,53};
 const float distanceConstant = 58.2;
-byte maxRange = 15;
+byte maxRange = 17;
 
 long duration, distance;
-long prevDistance;
 long wallDistance;
 
 byte dir = 2;
@@ -41,6 +40,12 @@ boolean enableState = 0;
 boolean prevEnableState = 0;
 
 byte switchKeepDriving = 1;
+
+char incomingByte = 0;
+int counter = 0;
+int xPos = 0;
+int  tempValue = 0;
+boolean clearedOne = 0;
 
 void setup()
 {
@@ -86,29 +91,87 @@ void loop()
   
   rightSwitchVal = digitalRead(rightSwitchPin);
   delay(1);
-
-  if(start)
+  
+  if(!start)
   {
-    if(!rotated)
+    if(Serial.available() > 0)
     {
-      if(!rightSwitchVal) // modify later for a state variable, to account for opposite hopper
+      while(true)
       {
-        movement(dir);
+        incomingByte = Serial.read();
+        if(incomingByte == '\n')
+          break;
+        tempValue *= 10;
+        tempValue += (int) (incomingByte - '0');
+      }
+      xpos = value;
+    }
+  }
+  else if(start)
+  {
+    if(!clearedOne)
+    {
+      if(!rotated)
+      {
+        if(!rightSwitchVal) // modify later for a state variable, to account for opposite hopper
+        {
+          movement(dir);
+        }
+        else
+        {
+          rotateIn();
+        }
       }
       else
       {
-        rotateIn();
+        if (dir == 2) // first retrieve the ball
+        {
+          dir = closeClaw(); // change direction to forward      
+          rotateOut();        
+        }
+        else
+        {      
+          if (!inPosition)
+          {
+            //Every iteration, check distance to wall
+            sensor(sensorNum);
+            Serial.print("Sensor Number: ");
+            Serial.println(sensorNum);
+          
+            // diagnostic outputs
+            Serial.print("The distance is: ");    
+            Serial.println(distance);           
+            // function call to determine if at wall or not
+            keepDriving(switchKeepDriving);         
+          }
+          else
+          {
+            if(moveArm(-1))
+            {
+              Serial.println("First checkpoint");
+              delay(1000);
+              if(armPos == 0)
+              {
+                if(openClaw())
+                {
+                  moveArm(1);
+                }
+              }
+            }          
+          }
+        }  
       }
     }
     else
     {
-      if (dir == 2) // first retrieve the ball
+      if(!leftSwitchVal && !rightSwitchVal)
       {
-        dir = closeClaw(); // change direction to forward      
-        rotateOut();        
+        sensor(sensorNum);
+        keepDriving(switchKeepDriving);
       }
       else
-      {      
+      {
+        dir = closeClaw();
         if (!inPosition)
         {
           //Every iteration, check distance to wall
@@ -136,8 +199,8 @@ void loop()
               }
             }
           }          
-        }
-      }  
+        }        
+      }
     }
   }  
 }
@@ -157,41 +220,32 @@ void turnMotorsOff()
 
 void keepDriving(byte lessGreater)
 {
-  sensor(sensorNum);
-  prevDistance = distance;
   if (lessGreater == 1)
   {
-    if (prevDistance - distance <= 2)
-    {
-      if (distance <= maxRange && distance != 0)
-      {   
-        turnMotorsOff();    
-        if(dir == 0)
-        {
-          sensor(0);
-          if(distance > maxRange)
-          {
-            movement(0);
-            do
-            {
-              sensor(0);
-            }while(distance >= maxRange);
-          }
-          turnMotorsOff();
-          dir = 3;
-          maxRange = 55;
-          sensorNum = 1;
-          switchKeepDriving = 0;
-        }
-        else if(dir == 3)
-        {
-          dir = -1;
-          inPosition = 1;
-        }
+    if (distance <= maxRange)
+    {   
+      turnMotorsOff();    
+      if(dir == 0)
+      {
+        dir = 3;
+        maxRange = 55;
+        sensorNum = 1;
+        switchKeepDriving = 0;
       }
-      else if (distance >= maxRange){
-        movement(dir);    
+      else if(dir == 3)
+      {
+        dir = -1;
+        inPosition = 1;
       }
+      else if(dir == 1)
+      {
+        dir = 2;
+        sensorNum = 3;
+        maxRange = 20;
+      }
+    }
+    else if (distance >= maxRange){
+      movement(dir);    
     }
   }
   else
@@ -199,8 +253,14 @@ void keepDriving(byte lessGreater)
     if (distance >= maxRange)
     {       
       turnMotorsOff();    
-      if(dir == 3)
-      {   
+      if(dir == 0)
+      {
+        dir = 3;
+        maxRange = 55;
+        sensorNum = 1;
+      }
+      else if(dir == 3)
+      {
         dir = -1;
         inPosition = 1;
       }
@@ -250,7 +310,7 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
   }
   else if(motorDirection == 1 || motorDirection == 3)
   {
-    frontMotor.setSpeed(65);
+    frontMotor.setSpeed(80);
     backMotor.setSpeed(255);
     frontMotor.run(oneTwo);
     backMotor.run(oneTwo);
@@ -378,8 +438,14 @@ boolean moveArm(int upDown) // -1 for up, 1 for down
   }
   else
   {
-    value = 0;
-    start = 0;
+    start = 1;
+    inPosition = 0;
+    rotated = 0;
+    switchKeepDriving = 1;
+    maxRange = xPos;
+    dir = 1;
+    sensorNum = 1;
+    clearedOne = 1;
   }
     
   return value;   

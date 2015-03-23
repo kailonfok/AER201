@@ -13,7 +13,7 @@ Servo armServo;
 
 int leftPos = 0; // Starting positions for servo claws
 int rightPos = 180;
-int armPos = 175;
+int armPos = 180;
 boolean start;
 boolean inPosition = 0;
 
@@ -23,9 +23,9 @@ const int rightSwitchPin = 32;
 
 // define constants for sonar sensors
 const int echoPin[] = {
-  22,24,26,28}; // Echo Pin
+  46,48,50,52}; // Echo Pin
 const int trigPin[] = {
-  23,25,27,29}; // Trigger Pin
+  47,49,51,53}; // Trigger Pin
 
 const float distanceConstant = 58.2;
 
@@ -45,9 +45,9 @@ void setup()
   Serial.begin(9600);
   
   // attach servo objects to respective pins
-  armServo.attach(51);
-  leftServo.attach(52);
-  rightServo.attach(53);  
+  armServo.attach(42);
+  leftServo.attach(41);
+  rightServo.attach(40);  
   
   // set servos to designated starting positions
   leftServo.write(leftPos);
@@ -89,6 +89,9 @@ void loop()
     }
     else
     {
+      movement(0);
+      delay(2000);
+      turnMotorsOff();
       if(moveArm(-1))
       {
         Serial.println("First checkpoint");
@@ -236,7 +239,7 @@ boolean moveArm(int upDown) // -1 for up, 1 for down
     delay(15);
     armPos += upDown;
     Serial.println("Stuck??");
-    if(armPos == 0 || armPos == 170)
+    if(armPos == 0 || armPos == 180)
       exit = 0;
   }while(exit == 1);
   
