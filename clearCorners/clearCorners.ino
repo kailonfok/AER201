@@ -8,10 +8,11 @@ AF_DCMotor backMotor(3);
 AF_DCMotor rightMotor(4);
 
 // Define pins for wing pins
+const byte frontSwitchPin = 34;
 const byte leftSwitchPin = 33;
 const byte rightSwitchPin = 32;
 
-int leftSwitchVal, rightSwitchVal;
+int leftSwitchVal, rightSwitchVal, frontSwitchVal;
 
 const byte echoPin[] = {46,48,50,52};
 const byte trigPin[] = {47,49,51,53};
@@ -50,6 +51,7 @@ void setup()
   Serial.begin(9600);
   pinMode(leftSwitchPin, INPUT);
   pinMode(rightSwitchPin, INPUT);
+  pinMode(frontSwitchPin, INPUT);
   
   armServo.attach(42);
   leftServo.attach(41); 
@@ -150,27 +152,57 @@ void loop()
       {      
         if (!inPosition)
         {
-          /*
-            THIS WILL BE MODIFIED TO ACCOUNT FOR A FORCE SENSOR
-            DRIVE TILL FORCE SENSOR HIT
-            REVERSE
-            GO LEFT OR RIGHT
-          */
-          //Every iteration, check distance to wall
-          sensor(sensorNum);
-          Serial.print("Sensor Number: ");
-          Serial.println(sensorNum);
-        
-          // diagnostic outputs
-          Serial.print("The distance is: ");    
-          Serial.println(distance);           
-          // function call to determine if at wall or not
-          keepDriving(switchKeepDriving);         
+          movement(0);
+          do
+          {
+            frontSwitchVal = digitalRead(frontSwitchPin);
+            Serial.println("Waiting for bump");
+            delay(1000);
+          }while(frontSwitchVal == 0);
+          
+          turnMotorsOff();
+          
+          movement(2);
+          delay(200);
+          turnMotorsOff();
+          
+          if(numBallsLeft[0] != 0)
+          {
+            sensorNum = 1;
+            dir = 3;
+          }
+          else
+          {
+            sensorNum = 3;
+            dir = 1;
+          }
+          movement(dir);
+          do
+          {
+            sensor(sensorNum);
+          }while(distance <= maxRange);
+          turnMotorsOff(); 
+ 
+          if(dir == 1)
+          {
+            dir = 3;
+          }
+          else if(dir == 1)
+          {
+            dir = 1;
+          }   
+          maxRange = 5;
+          inPosition = 1;         
         }
         else
         {
           movement(0);
-          delay(2000);
+          do
+          {
+            frontSwitchVal = digitalRead(frontSwitchPin);
+            Serial.println("Waiting for bump");
+            delay(1000);
+          }while(frontSwitchVal == 0);          
           turnMotorsOff();
           if(moveArm(-1))
           {
@@ -181,7 +213,7 @@ void loop()
               {
                 moveArm(1);
                 Serial.print("Num balls left: ");
-                Serial.println(numBallsLeft);
+                Serial.println(numBallsLeft[index]);
                 delay(1000);
               }
             }
