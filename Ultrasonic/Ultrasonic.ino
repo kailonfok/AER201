@@ -11,8 +11,8 @@
  on 10 Nov 2012.
  */
 
-#define echoPin 46 // Echo Pin
-#define trigPin 47 // Trigger Pin
+#define echoPin 48 // Echo Pin
+#define trigPin 49 // Trigger Pin
 
 #define LEDPin1 22 // red LED for out of range
 #define LEDPin2 23 // green LED for in range

@@ -8,10 +8,11 @@ AF_DCMotor backMotor(3);
 AF_DCMotor rightMotor(4);
 
 // Define pins for wing pins
+const byte frontSwitchPin = 34;
 const byte leftSwitchPin = 33;
 const byte rightSwitchPin = 32;
 
-int leftSwitchVal, rightSwitchVal;
+int leftSwitchVal, rightSwitchVal, frontSwitchVal;
 
 const byte echoPin[] = {46,48,50,52};
 const byte trigPin[] = {47,49,51,53};
@@ -23,6 +24,7 @@ long wallDistance;
 
 byte dir = 2;
 byte sensorNum = 0;
+boolean doneOnce = 0;
 
 // Define servo objects
 Servo leftServo;
@@ -43,15 +45,17 @@ byte switchKeepDriving = 1;
 
 char incomingByte = 0;
 int counter = 0;
-int xPos = 0;
+int xpos = 0;
+//byte currentTime, previousTime;
 int  tempValue = 0;
-boolean clearedOne = 0;
+boolean clearedOne = 1;
 
 void setup()
 {
   Serial.begin(9600);
   pinMode(leftSwitchPin, INPUT);
   pinMode(rightSwitchPin, INPUT);
+  pinMode(frontSwitchPin, INPUT);
   
   armServo.attach(42);
   leftServo.attach(41); 
@@ -104,8 +108,10 @@ void loop()
         tempValue *= 10;
         tempValue += (int) (incomingByte - '0');
       }
-      xpos = value;
+      xpos = tempValue;
     }
+    Serial.print("x-pos: ");
+    Serial.println(xpos);
   }
   else if(start)
   {
@@ -133,19 +139,41 @@ void loop()
         {      
           if (!inPosition)
           {
-            //Every iteration, check distance to wall
-            sensor(sensorNum);
-            Serial.print("Sensor Number: ");
-            Serial.println(sensorNum);
-          
-            // diagnostic outputs
-            Serial.print("The distance is: ");    
-            Serial.println(distance);           
-            // function call to determine if at wall or not
-            keepDriving(switchKeepDriving);         
+            movement(0);
+            do
+            {
+              frontSwitchVal = digitalRead(frontSwitchPin);
+              Serial.println("Waiting for bump");
+              delay(1000);
+            }while(frontSwitchVal == 0);
+            
+            turnMotorsOff();
+            
+            movement(2);
+            delay(400);
+            turnMotorsOff();
+            maxRange = 55;
+
+            movement(3);
+            do
+            {
+              sensor(sensorNum);
+            }while(distance <= maxRange);
+            turnMotorsOff(); 
+   
+            maxRange = 5;
+            inPosition = 1;              
           }
           else
           {
+            movement(0);
+            do
+            {
+              frontSwitchVal = digitalRead(frontSwitchPin);
+              Serial.println("Waiting for bump");
+              delay(1000);
+            }while(frontSwitchVal == 0);          
+            turnMotorsOff();            
             if(moveArm(-1))
             {
               Serial.println("First checkpoint");
@@ -164,26 +192,82 @@ void loop()
     }
     else
     {
-      if(!leftSwitchVal && !rightSwitchVal)
+      rightSwitchVal = digitalRead(rightSwitchPin);
+      if(!rotated)
       {
-        sensor(sensorNum);
-        keepDriving(switchKeepDriving);
+        if(!doneOnce)
+        {
+          sensor(1);
+          movement(1);
+          while(true)
+          {
+            sensor(1);
+            Serial.print("Distance: ");
+            Serial.println(distance);          
+            if(distance == xpos-10)
+            {
+              turnMotorsOff();
+              doneOnce = 1;
+              break;
+            }
+          }
+        }
+        
+        if(!rightSwitchVal) // modify later for a state variable, to account for opposite hopper
+        {
+          movement(2);
+        }
+        else
+        {
+          rotateIn();
+        }        
       }
       else
       {
         dir = closeClaw();
+//        movement(0);
+        leftMotor.setSpeed(175);
+        rightMotor.setSpeed(200);
+        leftMotor.run(FORWARD);
+        rightMotor.run(FORWARD);
+        delay(3000);
+        turnMotorsOff();
+          
+        rotateOutRight();
+        
         if (!inPosition)
         {
-          //Every iteration, check distance to wall
-          sensor(sensorNum);
-          Serial.print("Sensor Number: ");
-          Serial.println(sensorNum);
-        
-          // diagnostic outputs
-          Serial.print("The distance is: ");    
-          Serial.println(distance);           
-          // function call to determine if at wall or not
-          keepDriving(switchKeepDriving);         
+          movement(0);
+          do
+          {
+            frontSwitchVal = digitalRead(frontSwitchPin);
+            Serial.println("Waiting for bump");
+            delay(1000);
+          }while(frontSwitchVal == 0);
+          
+          turnMotorsOff();
+          
+          movement(2);
+          delay(400);
+          turnMotorsOff();
+          maxRange = 55;
+          movement(3);
+          do
+          {
+            sensor(1);
+          }while(distance <= maxRange);
+          turnMotorsOff(); 
+ 
+          if(dir == 1)
+          {
+            dir = 3;
+          }
+          else if(dir == 3)
+          {
+            dir = 1;
+          }   
+          maxRange = 5;
+          inPosition = 1;          
         }
         else
         {
@@ -388,6 +472,39 @@ void rotateOut()
   turnMotorsOff();  
 }
 
+void rotateOutRight()
+{
+  int currentTime = millis();
+  int previousTime = currentTime;
+  
+  leftMotor.setSpeed(255);
+  frontMotor.setSpeed(150);
+  leftMotor.run(FORWARD);
+  frontMotor.run(BACKWARD); 
+  
+  do
+  {
+    Serial.println("rotating out");
+    currentTime = millis();
+  }while(currentTime - previousTime <= 2000);
+  previousTime = currentTime;  
+  
+  turnMotorsOff();
+  
+  leftMotor.setSpeed(150);
+  backMotor.setSpeed(200);
+  leftMotor.run(BACKWARD);
+  backMotor.run(BACKWARD);
+  
+  do
+  {
+    Serial.println("Back to wall");
+    currentTime = millis();
+  }while(currentTime - previousTime <= 2000);
+  
+  turnMotorsOff();  
+}
+
 void sensor(int sensorNum)
 {
   digitalWrite(trigPin[sensorNum], LOW);
@@ -442,7 +559,7 @@ boolean moveArm(int upDown) // -1 for up, 1 for down
     inPosition = 0;
     rotated = 0;
     switchKeepDriving = 1;
-    maxRange = xPos;
+    maxRange = xpos;
     dir = 1;
     sensorNum = 1;
     clearedOne = 1;
