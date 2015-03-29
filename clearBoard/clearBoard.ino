@@ -51,7 +51,7 @@ int xpos[2];
 int tempValue = 0;
 
 int rotatingSpeed1 = 255;
-int rotatingSpeed2 = 170;
+int rotatingSpeed2 = 225;
 
 int numBallsLeft[] = {4,4,7};
 int index = 0;
