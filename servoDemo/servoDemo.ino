@@ -1,8 +1,11 @@
 #include <Servo.h> 
 
 Servo leftServo;  // create servo object to control a servo 
+// a maximum of eight servo objects can be created 
+Servo rightServo;
 
-int leftPos = 100;    // variable to store the servo position 
+int leftPos = 0;    // variable to store the servo position 
+int rightPos = 180;
 
 const int enableButPin = 32;
 int enableState = 0;
@@ -12,9 +15,11 @@ boolean start;
 void setup() 
 { 
   Serial.begin(4800);
-  leftServo.attach(39);  // attaches the servo on pin 9 to the servo object 
+  leftServo.attach(41);  // attaches the servo on pin 9 to the servo object 
+  rightServo.attach(40);
   
   leftServo.write(leftPos);
+  rightServo.write(rightPos);
   
   pinMode(enableButPin, INPUT);
 
@@ -44,9 +49,11 @@ void loop()
       Serial.println("lolol");
       leftServo.write(leftPos);
       delay(15);
-      leftPos--;
+      rightServo.write(rightPos);
+      rightPos--;
+      leftPos++;
            
-    }while(leftPos != 10);
+    }while(leftPos != 40 && rightPos != 140);
   }
 }
 
