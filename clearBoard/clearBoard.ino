@@ -50,10 +50,10 @@ int counter = 0;
 int xpos[2];
 int tempValue = 0;
 
-int rotatingSpeed1 = 255;
-int rotatingSpeed2 = 255;
+int rotatingSpeed1 = 245;
+int rotatingSpeed2 = 235;
 
-int numBallsLeft[] = {4,4,7};
+int numBallsLeft[] = {6,6,7};
 int index = 0;
 
 void setup()
@@ -142,7 +142,7 @@ void loop()
               leftMotor.setSpeed(245);
               rightMotor.setSpeed(245);
               rightMotor.run(BACKWARD);
-              rightMotor.run(BACKWARD);
+              leftMotor.run(BACKWARD);
           }
           else
           {
@@ -343,12 +343,21 @@ void turnMotorsOff()
 
 void waitForBump()
 {
+  int currentTime = millis();
+  int previousTime = currentTime;
   movement(0);
   do
   {
     frontSwitchVal = digitalRead(frontSwitchPin);
-//    Serial.println("Waiting for bump");
-//    delay(1000);
+    if(frontSwitchVal)
+    {
+      if(currentTime - previousTime <= 1000)
+      {
+        frontSwitchVal = 0;
+        Serial.println("Working");
+        delay(1000);
+      }
+    }
   }while(frontSwitchVal == 0);          
   turnMotorsOff();  
 }
@@ -548,6 +557,16 @@ void rotateIn()
       leftSwitchVal = digitalRead(leftSwitchPin);
     }while(!leftSwitchVal);    
   }
+  
+  movement(2);
+  do
+  {
+    rightSwitchVal = digitalRead(rightSwitchPin);
+    delay(1);
+    leftSwitchVal = digitalRead(leftSwitchPin);
+    delay(1);    
+  }while(!rightSwitchVal || !leftSwitchVal);
+  
   turnMotorsOff();
   
   rotated = 1;
