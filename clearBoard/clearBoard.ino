@@ -51,7 +51,7 @@ int xpos[2];
 int tempValue = 0;
 
 int rotatingSpeed1 = 255;
-int rotatingSpeed2 = 225;
+int rotatingSpeed2 = 255;
 
 int numBallsLeft[] = {4,4,7};
 int index = 0;
@@ -138,7 +138,11 @@ void loop()
         {
           if(!rightSwitchVal)
           {
-            movement(dir);
+//            movement(dir);
+              leftMotor.setSpeed(245);
+              rightMotor.setSpeed(245);
+              rightMotor.run(BACKWARD);
+              rightMotor.run(BACKWARD);
           }
           else
           {
@@ -175,8 +179,6 @@ void loop()
       {
         if (dir == 2) // first retrieve the ball
         {
-//          while(true)
-//            Serial.println("Done");
           dir = closeClaw(); // change direction to forward      
           
           if (index == 0)
@@ -215,7 +217,7 @@ void loop()
               turnMotorsOff();              
               
               movement(2);
-              delay(200);
+              delay(300);
               turnMotorsOff();
               maxRange = 55;
               if(numBallsLeft[0] != 0)
@@ -234,7 +236,6 @@ void loop()
                 sensor(sensorNum);
               }while(distance <= maxRange);
               turnMotorsOff(); 
-//              rightLeft(dir, maxRange);
        
               maxRange = 5;
               inPosition = 1;         
@@ -243,25 +244,14 @@ void loop()
           else
           {
             waitForBump();
-//            if(moveArm(-1))
-//            {
-//              delay(1000);
             if(armPos == 0)
             {
               if(openClaw())
               {
-                moveArm(1);
-                Serial.print("Num balls left: ");
-                Serial.println(numBallsLeft[index]);
-                delay(1000);
-                Serial.print("Index: ");
-                Serial.println(index);
-                delay(1000);
-                
+                moveArm(1);                
                 liftFrontServo(1);
               }
-            }
-//            }          
+            }        
           }
         }  
       }
@@ -327,9 +317,9 @@ void loop()
           if(openClaw())
           {
             moveArm(1);
-            Serial.print("Num balls left: ");
-            Serial.println(numBallsLeft[index]);
-            delay(1000);
+//            Serial.print("Num balls left: ");
+//            Serial.println(numBallsLeft[index]);
+//            delay(1000);
             liftFrontServo(1);            
           }
         }
@@ -347,7 +337,7 @@ void turnMotorsOff()
   backMotor.run(RELEASE);
   rightMotor.run(RELEASE);  
   
-  Serial.println("Motors off?");
+//  Serial.println("Motors off?");
   delay(1000);
 }
 
@@ -357,8 +347,8 @@ void waitForBump()
   do
   {
     frontSwitchVal = digitalRead(frontSwitchPin);
-    Serial.println("Waiting for bump");
-    delay(1000);
+//    Serial.println("Waiting for bump");
+//    delay(1000);
   }while(frontSwitchVal == 0);          
   turnMotorsOff();  
 }
@@ -437,32 +427,32 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
   if(motorDirection == 0)
   {
     oneTwo = 1;
-    Serial.println("Moving forwards");
-    delay(1000);
+//    Serial.println("Moving forwards");
+//    delay(1000);
   }
   else if(motorDirection == 1)
   {
     oneTwo = 2;
-    Serial.println("Moving right");
-    delay(1000);    
+//    Serial.println("Moving right");
+//    delay(1000);    
   }
   else if(motorDirection == 2)
   {
     oneTwo = 2;
-    Serial.println("Moving backwards");  
-    delay(1000);    
+//    Serial.println("Moving backwards");  
+//    delay(1000);    
   }
   else
   {
     oneTwo = 1;
-    Serial.println("Moving left");
-    delay(1000);    
+//    Serial.println("Moving left");
+//    delay(1000);    
   }
   
   if (motorDirection == 0 || motorDirection == 2)
   {
-    byte speed1 = 255;
-    byte speed2 = 235;
+    byte speed1 = 250;
+    byte speed2 = 210;
     
     if(index == 0)
     {
@@ -470,14 +460,14 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
       rightMotor.setSpeed(speed2);
     }
     else if (index == 1)
-    {
+    {   
       leftMotor.setSpeed(speed2);
       rightMotor.setSpeed(speed1);
     }
     else
     {
-      leftMotor.setSpeed(245);
-      rightMotor.setSpeed(245);
+      leftMotor.setSpeed(235);
+      rightMotor.setSpeed(235);
     }
     leftMotor.run(oneTwo);
     rightMotor.run(oneTwo);
@@ -531,8 +521,8 @@ void rotateIn()
   }
   else
   {
-    Serial.println("Did the right thing.");
-    delay(1000);
+//    Serial.println("Did the right thing.");
+//    delay(1000);
     leftSwitchVal = digitalRead(leftSwitchPin);
     leftMotor.setSpeed(speed1);
     frontMotor.setSpeed(speed2);
@@ -577,7 +567,9 @@ void rotateOutRight()
   {
     Serial.println("rotating out");
     currentTime = millis();
+//    sensor(1);
   }while(currentTime - previousTime <= 2000);
+//  }while(distance <= 5);
   previousTime = currentTime;  
   
   turnMotorsOff();
@@ -610,7 +602,9 @@ void rotateOutLeft()
   {
     Serial.println("rotating out");
     currentTime = millis();
+//    sensor(3);
   }while(currentTime - previousTime <= 2000);
+//  }while(distance <= 5);
   previousTime = currentTime;  
   
   turnMotorsOff();
@@ -746,7 +740,7 @@ void liftFrontServo(int upDown)
     frontServo.write(frontPos);
     delay(15);
     frontPos += upDown;
-    if(frontPos == 10 || frontPos == 100)
+    if(frontPos == 5 || frontPos == 100)
       exit = 0;
   }while(exit == 1);   
 }

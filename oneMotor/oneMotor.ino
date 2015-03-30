@@ -1,7 +1,7 @@
 #include <AFMotor.h>
 
-AF_DCMotor leftMotor(2); // change the numbers here to "connect" to different motors (labeled on the motor shield)
-AF_DCMotor rightMotor(4);
+AF_DCMotor leftMotor(1); // change the numbers here to "connect" to different motors (labeled on the motor shield)
+AF_DCMotor rightMotor(3);
 
 void setup()
 {
