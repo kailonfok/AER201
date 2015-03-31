@@ -198,7 +198,7 @@ void loop()
                   do
                   {
                     sensor(1);
-                  } while (distance >= 5);
+                  } while (distance >= 4);
                 }
                 else
                 {
@@ -206,7 +206,7 @@ void loop()
                   do
                   {
                     sensor(3);
-                  } while (distance >= 5);
+                  } while (distance >= 4);
                 }
                 turnMotorsOff();
   
