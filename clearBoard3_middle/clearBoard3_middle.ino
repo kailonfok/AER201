@@ -510,7 +510,7 @@ void rotateIn()
   int speed2 = 140;
   turnMotorsOff();
 
-  if (numBallsLeft[0] == 6 || index == 1)
+  if (numBallsLeft[0] == 1 || index == 1)
   {
     rightSwitchVal = digitalRead(rightSwitchPin);
     rightMotor.setSpeed(speed2);

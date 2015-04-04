@@ -205,6 +205,10 @@ void loop()
                   sensorNum = 3;
                 }
 
+                movement(2);
+                delay(400);
+                turnMotorsOff();
+
                 movement(dir);
                 do
                 {
@@ -212,9 +216,6 @@ void loop()
                 } while (distance >= 4);
                 turnMotorsOff();
 
-                movement(2);
-                delay(400);
-                turnMotorsOff();
                 maxRange = 50;
                 if (numBallsLeft[0] != 0)
                 {
@@ -509,8 +510,8 @@ void rotateIn()
     rightSwitchVal = digitalRead(rightSwitchPin);
     rightMotor.setSpeed(speed2);
     frontMotor.setSpeed(speed1);
-    //    backMotor.setSpeed(speed2);
-    //    backMotor.run(BACKWARD);
+    backMotor.setSpeed(speed2);
+    backMotor.run(BACKWARD);
     rightMotor.run(BACKWARD);
     frontMotor.run(BACKWARD);
 
@@ -538,8 +539,8 @@ void rotateIn()
     leftSwitchVal = digitalRead(leftSwitchPin);
     leftMotor.setSpeed(speed2);
     frontMotor.setSpeed(speed1);
-    //    backMotor.setSpeed(speed2);
-    //    backMotor.run(FORWARD);
+    backMotor.setSpeed(speed2);
+    backMotor.run(FORWARD);
     leftMotor.run(BACKWARD);
     frontMotor.run(FORWARD);
 
