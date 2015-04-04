@@ -52,7 +52,7 @@ int tempValue = 0;
 int rotatingSpeed1 = 245;
 int rotatingSpeed2 = 235;
 
-int motorSpeeds[] = {100, 250, 255, 210};
+int motorSpeeds[] = {100, 255, 245, 210};
 
 int numBallsLeft[] = {6, 6, 7};
 int index = 0;
@@ -161,12 +161,11 @@ void loop()
           delay(1);
 
           if (!leftSwitchVal && !rightSwitchVal) // modify later for a state variable, to account for opposite hopper
-          {
+          {            
             //Every iteration, check distance to wall
             sensor(sensorNum);
             // function call to determine if at wall or not
             keepDriving(switchKeepDriving);
-            Serial.println("I'm confused");
           }
           else
           {
@@ -214,7 +213,7 @@ void loop()
                 turnMotorsOff();
   
                 movement(2);
-                delay(300);
+                delay(400);
                 turnMotorsOff();
                 maxRange = 50;
                 if (numBallsLeft[0] != 0)
@@ -234,7 +233,7 @@ void loop()
                 } while (distance <= maxRange);
                 turnMotorsOff();
   
-                maxRange = 5;
+                maxRange = 4;
                 inPosition = 1;
               }
             }
@@ -249,11 +248,17 @@ void loop()
                 {
                   moveArm(1);
                   liftFrontServo(1);
-                  Serial.print("Direction: ");
-                  Serial.println(dir);
-                  Serial.print("Num balls left: ");
-                  Serial.println(numBallsLeft[index]);
-                  delay(2000);
+                  leftMotor.setSpeed(245);
+                  rightMotor.setSpeed(245);
+                  leftMotor.run(BACKWARD);
+                  rightMotor.run(BACKWARD);
+                  delay(300);
+                  turnMotorsOff();
+//                  Serial.print("Direction: ");
+//                  Serial.println(dir);
+//                  Serial.print("Num balls left: ");
+//                  Serial.println(numBallsLeft[index]);
+//                  delay(2000);
                 }
               }
             }
@@ -392,12 +397,12 @@ void keepDriving(byte lessGreater)
       }
       else if (dir == 1)
       {
-        sensorNum = 0;
+        sensorNum = 3;
         dir = 2;
       }
       else if (dir == 3)
       {
-        sensorNum = 0;
+        sensorNum = 1;
         dir = 2;
       }
     }
@@ -414,13 +419,13 @@ void keepDriving(byte lessGreater)
       {
         dir = 1;
         inPosition = 1;
-        maxRange = 5;
+        maxRange = 4;
       }
       else if (dir == 1)
       {
         dir = 3;
         inPosition = 1;
-        maxRange = 5;
+        maxRange = 4;
       }
     }
     else if (distance <= maxRange) {
@@ -490,15 +495,17 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
 
 void rotateIn()
 {
-  int speed1 = 240;
-  int speed2 = 150;
+  int speed1 = 255;
+  int speed2 = 140;
   turnMotorsOff();
 
   if (numBallsLeft[0] == 6 || index == 1)
   {
     rightSwitchVal = digitalRead(rightSwitchPin);
-    rightMotor.setSpeed(speed1);
-    frontMotor.setSpeed(speed2);
+    rightMotor.setSpeed(speed2);
+    frontMotor.setSpeed(speed1);
+//    backMotor.setSpeed(speed2);
+//    backMotor.run(BACKWARD);
     rightMotor.run(BACKWARD);
     frontMotor.run(BACKWARD);
 
@@ -524,8 +531,10 @@ void rotateIn()
   else
   {
     leftSwitchVal = digitalRead(leftSwitchPin);
-    leftMotor.setSpeed(speed1);
-    frontMotor.setSpeed(speed2);
+    leftMotor.setSpeed(speed2);
+    frontMotor.setSpeed(speed1);
+//    backMotor.setSpeed(speed2);
+//    backMotor.run(FORWARD);
     leftMotor.run(BACKWARD);
     frontMotor.run(FORWARD);
 
@@ -550,7 +559,18 @@ void rotateIn()
   }
   turnMotorsOff();
 
-  movement(2);
+  leftMotor.setSpeed(240);
+  rightMotor.setSpeed(240);
+  rightMotor.run(FORWARD);
+  leftMotor.run(FORWARD);
+  delay(300);
+  turnMotorsOff();
+
+  leftMotor.setSpeed(250);
+  rightMotor.setSpeed(250);
+  leftMotor.run(BACKWARD);
+  rightMotor.run(BACKWARD);
+
   do
   {
     rightSwitchVal = digitalRead(rightSwitchPin);

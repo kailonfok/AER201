@@ -1,10 +1,17 @@
 #include <AFMotor.h>
+#include <Servo.h>
 
-AF_DCMotor leftMotor(1); // change the numbers here to "connect" to different motors (labeled on the motor shield)
-AF_DCMotor rightMotor(3);
+AF_DCMotor leftMotor(2); // change the numbers here to "connect" to different motors (labeled on the motor shield)
+AF_DCMotor rightMotor(4);
+
+Servo frontServo;
+byte frontPos = 100;
 
 void setup()
 {
+  frontServo.attach(39);
+  frontServo.write(frontPos);
+  
   leftMotor.setSpeed(255); // change these numbers to get varying speed, max is 255
   rightMotor.setSpeed(255);
 
