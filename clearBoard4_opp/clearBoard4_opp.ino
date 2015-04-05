@@ -49,10 +49,10 @@ int counter = 0;
 int xpos[2];
 int tempValue = 0;
 
-int rotatingSpeed1 = 245;
-int rotatingSpeed2 = 235;
+int rotatingSpeed1 = 255;
+int rotatingSpeed2 = 245;
 
-int motorSpeeds[] = {100, 255, 245, 225};
+int motorSpeeds[] = {100, 255, 245, 210};
 
 int numInCorner = 4;
 int numBallsLeft[] = {numInCorner, numInCorner, 7};
@@ -118,13 +118,13 @@ void loop()
         tempValue *= 10;
         tempValue += (int) (incomingByte - '0');
       }
-      if (counter < 2)
+      if(counter < 2)
       {
         xpos[counter] = tempValue;
       }
       else
       {
-        motorSpeeds[counter - 2] = tempValue;
+        motorSpeeds[counter-2] = tempValue;
       }
       counter++;
     }
@@ -162,7 +162,7 @@ void loop()
           delay(1);
 
           if (!leftSwitchVal && !rightSwitchVal) // modify later for a state variable, to account for opposite hopper
-          {
+          {            
             //Every iteration, check distance to wall
             sensor(sensorNum);
             // function call to determine if at wall or not
@@ -191,10 +191,10 @@ void loop()
         {
           if (!inPosition)
           {
-            if (waitForBump())
+            if(waitForBump())
             {
               if (moveArm(-1))
-              {
+              {  
                 if (index == 0)
                 {
                   dir = 1;
@@ -205,18 +205,18 @@ void loop()
                   dir = 3;
                   sensorNum = 3;
                 }
-
+                
                 movement(2);
                 delay(400);
-                turnMotorsOff();
-
+                turnMotorsOff();                
+                
                 movement(dir);
                 do
                 {
                   sensor(sensorNum);
-                } while (distance >= 4);
+                }while(distance >= 4);
                 turnMotorsOff();
-
+ 
                 maxRange = 50;
                 if (numBallsLeft[0] != 0)
                 {
@@ -234,7 +234,7 @@ void loop()
                   sensor(sensorNum);
                 } while (distance <= maxRange);
                 turnMotorsOff();
-
+  
                 maxRange = 4;
                 inPosition = 1;
               }
@@ -242,7 +242,7 @@ void loop()
           }
           else
           {
-            if (waitForBump())
+            if(waitForBump())
             {
               if (armPos == 0)
               {
@@ -254,8 +254,14 @@ void loop()
                   rightMotor.setSpeed(245);
                   leftMotor.run(BACKWARD);
                   rightMotor.run(BACKWARD);
-                  delay(300);
+                  delay(200);
                   turnMotorsOff();
+                  leftMotor.setSpeed(245);
+                  rightMotor.setSpeed(245);
+                  leftMotor.run(FORWARD);
+                  rightMotor.run(FORWARD);
+                  delay(200);
+                  turnMotorsOff();                  
                 }
               }
             }
@@ -265,73 +271,63 @@ void loop()
     }
     else
     {
-      if (tempValue != 0)
+      if (xpos[0] == 1)
       {
-        if (xpos[0] == 1)
-        {
-          movement(1);
-          do
-          {
-            sensor(1);
-          } while (distance >= xpos[1]);
-
-          dir = 3;
-          sensorNum = 1;
-        }
-        else
-        {
-          movement(3);
-          do
-          {
-            sensor(3);
-          } while (distance >= xpos[1]);
-          dir = 1;
-          sensorNum = 3;
-        }
-        turnMotorsOff();
-
-        movement(2);
+        movement(1);
         do
         {
-          rightSwitchVal = digitalRead(rightSwitchPin);
-          leftSwitchVal = digitalRead(leftSwitchPin);
-        } while (!rightSwitchVal && !leftSwitchVal);
+          sensor(1);
+        } while (distance <= xpos[1]);
+
+        dir = 3;
+        sensorNum = 1;
+      }
+      else
+      {
+        movement(3);
+        do
+        {
+          sensor(3);
+        } while (distance <= xpos[1]);
+        dir = 1;
+        sensorNum = 3;
+      }
+      turnMotorsOff();
+
+      movement(2);
+      do
+      {
+        rightSwitchVal = digitalRead(rightSwitchPin);
+        leftSwitchVal = digitalRead(leftSwitchPin);
+      } while (!rightSwitchVal && !leftSwitchVal);
+      turnMotorsOff();
+      closeClaw();
+      liftFrontServo(-1);
+
+      waitForBump();
+      if (moveArm(-1))
+      {
+        movement(2);
+        delay(300);
+        turnMotorsOff();
+        maxRange = 55;
+
+        movement(dir);
+        do
+        {
+          sensor(sensorNum);
+        } while (distance <= maxRange);
         turnMotorsOff();
 
-        tempValue = closeClaw();
+        waitForBump();
 
-        liftFrontServo(-1);
-      }
-
-      if (waitForBump())
-      {
-        if (moveArm(-1))
+//        delay(1000);
+        if (armPos == 0)
         {
-          movement(2);
-          delay(300);
-          turnMotorsOff();
-          maxRange = 55;
-
-          movement(dir);
-          do
+          if (openClaw())
           {
-            sensor(sensorNum);
-          } while (distance <= maxRange);
-          turnMotorsOff();
-
-          if (waitForBump())
-          {
-            if (armPos == 0)
-            {
-              if (openClaw())
-              {
-                moveArm(1);
-                liftFrontServo(1);
-                movement(2);
-                delay(200);
-                turnMotorsOff();
-              }
-            }
+            moveArm(1);
+            liftFrontServo(1);
           }
         }
       }
@@ -359,26 +355,26 @@ boolean waitForBump()
   rightMotor.setSpeed(245);
   leftMotor.run(FORWARD);
   rightMotor.run(FORWARD);
-
-  while (true)
+  
+  while(true)
   {
     frontSwitchVal = digitalRead(frontSwitchPin);
-
-    if (frontSwitchVal)
+    
+    if(frontSwitchVal)
     {
-      prevTime = millis();
+      prevTime = millis();    
       do
       {
         Serial.println("Stuck");
         currentTime = millis();
         frontSwitchVal = digitalRead(frontSwitchPin);
-        if (!frontSwitchVal)
+        if(!frontSwitchVal)
         {
           return 0;
         }
-      } while (frontSwitchVal && (currentTime - prevTime <= 2000));
+      }while(frontSwitchVal && (currentTime - prevTime <= 2000));    
       turnMotorsOff();
-      return 1;
+      return 1;       
     }
   }
 }
@@ -506,7 +502,7 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
 void rotateIn()
 {
   int speed1 = 255;
-  int speed2 = 140;
+  int speed2 = 160;
   turnMotorsOff();
 
   if (numBallsLeft[0] == numInCorner || index == 1)
@@ -514,8 +510,8 @@ void rotateIn()
     rightSwitchVal = digitalRead(rightSwitchPin);
     rightMotor.setSpeed(speed2);
     frontMotor.setSpeed(speed1);
-    backMotor.setSpeed(speed2);
-    backMotor.run(BACKWARD);
+//    backMotor.setSpeed(speed2);
+//    backMotor.run(BACKWARD);
     rightMotor.run(BACKWARD);
     frontMotor.run(BACKWARD);
 
@@ -543,8 +539,8 @@ void rotateIn()
     leftSwitchVal = digitalRead(leftSwitchPin);
     leftMotor.setSpeed(speed2);
     frontMotor.setSpeed(speed1);
-    backMotor.setSpeed(speed2);
-    backMotor.run(FORWARD);
+//    backMotor.setSpeed(speed2);
+//    backMotor.run(FORWARD);
     leftMotor.run(BACKWARD);
     frontMotor.run(FORWARD);
 

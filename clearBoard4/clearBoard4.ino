@@ -54,7 +54,8 @@ int rotatingSpeed2 = 245;
 
 int motorSpeeds[] = {100, 255, 245, 210};
 
-int numBallsLeft[] = {6, 6, 7};
+int numInCorner = 4;
+int numBallsLeft[] = {numInCorner, numInCorner, 7};
 int index = 0;
 
 void setup()
@@ -139,7 +140,7 @@ void loop()
         rightSwitchVal = digitalRead(rightSwitchPin);
         delay(1);
 
-        if (numBallsLeft[0] == 6) // only for very initial retrieval
+        if (numBallsLeft[0] == numInCorner) // only for very initial retrieval
         {
           if (!rightSwitchVal)
           {
@@ -205,16 +206,17 @@ void loop()
                   sensorNum = 3;
                 }
                 
+                movement(2);
+                delay(400);
+                turnMotorsOff();                
+                
                 movement(dir);
                 do
                 {
                   sensor(sensorNum);
                 }while(distance >= 4);
                 turnMotorsOff();
-  
-                movement(2);
-                delay(400);
-                turnMotorsOff();
+ 
                 maxRange = 50;
                 if (numBallsLeft[0] != 0)
                 {
@@ -502,7 +504,7 @@ void rotateIn()
   int speed2 = 140;
   turnMotorsOff();
 
-  if (numBallsLeft[0] == 6 || index == 1)
+  if (numBallsLeft[0] == numInCorner || index == 1)
   {
     rightSwitchVal = digitalRead(rightSwitchPin);
     rightMotor.setSpeed(speed2);
