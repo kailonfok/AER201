@@ -46,7 +46,7 @@ byte switchKeepDriving = 1;
 
 char incomingByte = 0;
 int counter = 0;
-int xpos[2];
+int xpos[2] = {1,43};
 int tempValue = 0;
 
 int rotatingSpeed1 = 245;
@@ -256,6 +256,12 @@ void loop()
                   rightMotor.run(BACKWARD);
                   delay(200);
                   turnMotorsOff();
+                  leftMotor.setSpeed(245);
+                  rightMotor.setSpeed(245);
+                  leftMotor.run(FORWARD);
+                  rightMotor.run(FORWARD);
+                  delay(200);
+                  turnMotorsOff();                  
                 }
               }
             }
@@ -304,7 +310,7 @@ void loop()
         movement(2);
         delay(300);
         turnMotorsOff();
-        maxRange = 55;
+        maxRange = 50;
 
         movement(dir);
         do
@@ -397,12 +403,12 @@ void keepDriving(byte lessGreater)
       }
       else if (dir == 1)
       {
-        sensorNum = 3;
+        sensorNum = 0;
         dir = 2;
       }
       else if (dir == 3)
       {
-        sensorNum = 1;
+        sensorNum = 0;
         dir = 2;
       }
     }
@@ -495,7 +501,7 @@ void movement(int motorDirection)//0 is forward, 1 is right, 2 is back, 3 is lef
 
 void rotateIn()
 {
-  int speed1 = 255;
+  int speed1 = 250;
   int speed2 = 140;
   turnMotorsOff();
 
@@ -504,8 +510,8 @@ void rotateIn()
     rightSwitchVal = digitalRead(rightSwitchPin);
     rightMotor.setSpeed(speed2);
     frontMotor.setSpeed(speed1);
-//    backMotor.setSpeed(speed2);
-//    backMotor.run(BACKWARD);
+    backMotor.setSpeed(speed2);
+    backMotor.run(BACKWARD);
     rightMotor.run(BACKWARD);
     frontMotor.run(BACKWARD);
 
@@ -533,8 +539,8 @@ void rotateIn()
     leftSwitchVal = digitalRead(leftSwitchPin);
     leftMotor.setSpeed(speed2);
     frontMotor.setSpeed(speed1);
-//    backMotor.setSpeed(speed2);
-//    backMotor.run(FORWARD);
+    backMotor.setSpeed(speed2);
+    backMotor.run(FORWARD);
     leftMotor.run(BACKWARD);
     frontMotor.run(FORWARD);
 

@@ -46,7 +46,7 @@ byte switchKeepDriving = 1;
 
 char incomingByte = 0;
 int counter = 0;
-int xpos[2];
+int xpos[2] = {1,43};
 int tempValue = 0;
 
 int rotatingSpeed1 = 255;
@@ -398,17 +398,17 @@ void keepDriving(byte lessGreater)
           dir = 1;
           sensorNum = 3;
         }
-        maxRange = 55;
+        maxRange = 50;
         switchKeepDriving = 0;
       }
       else if (dir == 1)
       {
-        sensorNum = 3;
+        sensorNum = 0;
         dir = 2;
       }
       else if (dir == 3)
       {
-        sensorNum = 1;
+        sensorNum = 0;
         dir = 2;
       }
     }

@@ -46,7 +46,7 @@ byte switchKeepDriving = 1;
 
 char incomingByte = 0;
 int counter = 0;
-int xpos[2];
+int xpos[2] = {2, 43};
 int tempValue = 0;
 
 int rotatingSpeed1 = 245;
@@ -256,6 +256,12 @@ void loop()
                   rightMotor.run(BACKWARD);
                   delay(300);
                   turnMotorsOff();
+                  leftMotor.setSpeed(245);
+                  rightMotor.setSpeed(245);
+                  leftMotor.run(FORWARD);
+                  rightMotor.run(FORWARD);
+                  delay(300);
+                  turnMotorsOff();                  
                 }
               }
             }
@@ -389,17 +395,17 @@ void keepDriving(byte lessGreater)
           dir = 1;
           sensorNum = 3;
         }
-        maxRange = 60;
+        maxRange = 50;
         switchKeepDriving = 0;
       }
       else if (dir == 1)
       {
-        sensorNum = 3;
+        sensorNum = 0;
         dir = 2;
       }
       else if (dir == 3)
       {
-        sensorNum = 1;
+        sensorNum = 0;
         dir = 2;
       }
     }
@@ -496,7 +502,7 @@ void rotateIn()
   int speed2 = 140;
   turnMotorsOff();
 
-  if (numBallsLeft[0] == numInCorners || index == 1)
+  if (numBallsLeft[0] == numInCorner || index == 1)
   {
     rightSwitchVal = digitalRead(rightSwitchPin);
     rightMotor.setSpeed(speed2);

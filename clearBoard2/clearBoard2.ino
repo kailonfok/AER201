@@ -304,7 +304,7 @@ void loop()
         movement(2);
         delay(300);
         turnMotorsOff();
-        maxRange = 55;
+        maxRange = 50;
 
         movement(dir);
         do
@@ -389,17 +389,17 @@ void keepDriving(byte lessGreater)
           dir = 1;
           sensorNum = 3;
         }
-        maxRange = 55;
+        maxRange = 50;
         switchKeepDriving = 0;
       }
       else if (dir == 1)
       {
-        sensorNum = 3;
+        sensorNum = 0;
         dir = 2;
       }
       else if (dir == 3)
       {
-        sensorNum = 1;
+        sensorNum = 0;
         dir = 2;
       }
     }

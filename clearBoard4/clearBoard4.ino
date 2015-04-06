@@ -46,7 +46,7 @@ byte switchKeepDriving = 1;
 
 char incomingByte = 0;
 int counter = 0;
-int xpos[2];
+int xpos[2] = {2,43};
 int tempValue = 0;
 
 int rotatingSpeed1 = 255;
@@ -220,12 +220,12 @@ void loop()
                 maxRange = 50;
                 if (numBallsLeft[0] != 0)
                 {
-                  sensorNum = 1;
+                  sensorNum = 0;
                   dir = 3;
                 }
                 else
                 {
-                  sensorNum = 3;
+                  sensorNum = 0;
                   dir = 1;
                 }
                 movement(dir);
@@ -256,11 +256,12 @@ void loop()
                   rightMotor.run(BACKWARD);
                   delay(200);
                   turnMotorsOff();
-//                  Serial.print("Direction: ");
-//                  Serial.println(dir);
-//                  Serial.print("Num balls left: ");
-//                  Serial.println(numBallsLeft[index]);
-//                  delay(2000);
+                  leftMotor.setSpeed(245);
+                  rightMotor.setSpeed(245);
+                  leftMotor.run(FORWARD);
+                  rightMotor.run(FORWARD);
+                  delay(200);
+                  turnMotorsOff();                  
                 }
               }
             }
@@ -309,7 +310,7 @@ void loop()
         movement(2);
         delay(300);
         turnMotorsOff();
-        maxRange = 55;
+        maxRange = 50;
 
         movement(dir);
         do
@@ -397,7 +398,7 @@ void keepDriving(byte lessGreater)
           dir = 1;
           sensorNum = 3;
         }
-        maxRange = 55;
+        maxRange = 50;
         switchKeepDriving = 0;
       }
       else if (dir == 1)
